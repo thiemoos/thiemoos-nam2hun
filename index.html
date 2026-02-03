@@ -13,16 +13,17 @@
         .hidden { display: none !important; }
         button { cursor: pointer; border: none; font-family: inherit; background: none; color: inherit; }
 
-        /* 상단 내비게이션 바 (새로 추가) */
+        /* 상단 내비게이션 바 */
         .top-nav { position: absolute; top: 0; width: 100%; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.6); z-index: 200; border-bottom: 1px solid rgba(197, 160, 89, 0.3); }
         .nav-arrow { font-size: 30px; color: var(--gold); padding: 10px; }
         #scene-title { font-size: 18px; font-weight: bold; color: var(--gold); letter-spacing: 2px; }
 
         /* 메인 게임 영역 */
-        #bg-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; padding-top: 60px; /* 상단바 공간 */ }
+        #bg-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; padding-top: 60px; }
         #scene-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         #clue-layer { position: absolute; z-index: 10; pointer-events: none; }
-        .clue { position: absolute; width: 80px; height: 80px; transform: translate(-50%, -50%); background: transparent; pointer-events: auto; }
+        /* 단서 크기 50px로 수정 */
+        .clue { position: absolute; width: 50px; height: 50px; transform: translate(-50%, -50%); background: transparent; pointer-events: auto; }
         
         .bottom-bar { position: absolute; bottom: 40px; display: flex; width: 100%; justify-content: center; gap: 20px; z-index: 100; }
         .bottom-btn { width: 150px; padding: 15px 0; border: 1px solid var(--gold); background: rgba(0,0,0,0.8); color: var(--gold); font-weight: bold; }
@@ -31,22 +32,29 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; }
         #list-overlay { z-index: 1000; }
         #profile-overlay { z-index: 2000; background: rgba(0,0,0,0.9); }
-        .modal-card { width: 90%; max-height: 85%; background: #111; border: 1px solid var(--gold); position: relative; display: flex; flex-direction: column; }
+        .modal-card { width: 90%; max-height: 85%; background: #111; border: 1px solid var(--gold); position: relative; display: flex; flex-direction: column; overflow: hidden; }
         .close-x { position: absolute; top: 10px; right: 20px; font-size: 40px; color: var(--gold); z-index: 2100; }
-        .p-header { width: 100%; height: 250px; background: #000; }
+        
+        /* 프로필 스크롤 적용 */
+        .p-header { width: 100%; height: 250px; background: #000; flex-shrink: 0; }
         .p-img-box { width: 100%; height: 100%; object-fit: contain; }
-        .p-body { padding: 25px; overflow-y: auto; text-align: left; line-height: 1.8; white-space: pre-wrap; font-size: 16px; color: #eee; }
+        .p-body { padding: 25px; overflow-y: auto; text-align: left; line-height: 1.8; white-space: pre-wrap; font-size: 16px; color: #eee; flex: 1; }
 
-        /* 심문 인터페이스 */
-        .inter-layout { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 20px; }
-        .inter-main { display: flex; flex: 1; gap: 20px; margin-top: 40px; }
-        .inter-left { width: 45%; }
-        .inter-right { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        .i-name-tag { font-size: 24px; color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; text-align: left; }
-        .i-res-box { flex: 1; background: #111; padding: 20px; border: 1px solid #333; overflow-y: auto; text-align: left; font-size: 16px; line-height: 1.7; }
-        .i-btn-box { height: 150px; display: flex; flex-direction: column; gap: 10px; }
-        .query-btn { background: #1a1a1a; border: 1px solid var(--gold); padding: 15px; color: #fff; text-align: left; font-size: 15px; }
-        .next-btn { background: var(--gold); color: #000; padding: 15px; font-weight: bold; margin-top: 10px; }
+        /* 심문 인터페이스 세로 배치 및 스크롤 수정 */
+        .inter-layout { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 60px 20px 20px 20px; }
+        .inter-main { display: flex; flex-direction: column; flex: 1; gap: 10px; overflow: hidden; }
+        
+        .i-name-tag { font-size: 22px; color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 5px; text-align: center; flex-shrink: 0; }
+        
+        .inter-left { width: 100%; height: 30%; flex-shrink: 0; } /* 얼굴 영역 */
+        #i-img { width: 100%; height: 100%; object-fit: contain; }
+
+        .inter-right { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        .i-res-box { flex: 1; background: #111; padding: 15px; border: 1px solid #333; overflow-y: auto; text-align: left; font-size: 16px; line-height: 1.6; }
+        
+        .i-btn-box { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding-bottom: 10px; }
+        .query-btn { background: #1a1a1a; border: 1px solid var(--gold); padding: 12px; color: #fff; text-align: left; font-size: 14px; }
+        .next-btn { background: var(--gold); color: #000; padding: 15px; font-weight: bold; }
 
         /* 타이틀 & 정보 */
         #title-screen h1 { font-size: 45px; letter-spacing: 12px; margin: 0; color: #fff; }
@@ -93,25 +101,25 @@
     <div id="list-overlay" class="overlay hidden">
         <div class="modal-card">
             <button class="close-x" onclick="closeList()">×</button>
-            <div id="list-content"></div>
+            <div id="list-content" style="overflow-y:auto; flex:1;"></div>
         </div>
     </div>
 
     <div id="profile-overlay" class="overlay hidden">
         <div class="modal-card">
             <button class="close-x" onclick="closeProfile()">×</button>
-            <div id="profile-content"></div>
+            <div id="profile-content" style="display:flex; flex-direction:column; height:100%;"></div>
         </div>
     </div>
 
     <div id="inter-screen" class="full-screen hidden">
         <div class="inter-layout">
+            <div id="i-name" class="i-name-tag"></div>
             <div class="inter-main">
                 <div class="inter-left">
-                    <img id="i-img" style="width:100%; height:100%; object-fit:contain; border:1px solid #333;">
+                    <img id="i-img" style="border:1px solid #333;">
                 </div>
                 <div class="inter-right">
-                    <div id="i-name" class="i-name-tag"></div>
                     <div id="i-res" class="i-res-box"></div>
                     <div id="i-btns" class="i-btn-box"></div>
                 </div>
@@ -138,6 +146,7 @@
     </div>
 
 <script>
+    // 데이터 섹션 (작가님 원본 그대로 유지)
     const data = {
         info: [
             "해송그룹 80주년 기념식에 사망사건이 발생했다.",
@@ -236,7 +245,7 @@
         const layer = document.getElementById('clue-layer');
         const title = document.getElementById('scene-title');
         
-        title.innerText = s.name; // 상단바 제목 업데이트
+        title.innerText = s.name;
         img.src = s.img;
         img.onload = () => {
             const r = img.getBoundingClientRect();
@@ -273,7 +282,7 @@
 
     function showList() {
         const modal = document.getElementById('list-overlay');
-        let html = `<div class="p-body"><h2 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0;">용의자 명단</h2>`;
+        let html = `<div class="p-body"><h2 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0; flex-shrink:0;">용의자 명단</h2>`;
         if(foundSus.length === 0) {
             html += `<p style="text-align:center; padding:20px;">아직 발견된 인물이 없습니다.</p>`;
         } else {
@@ -317,6 +326,8 @@
                 const btn = document.createElement('button'); btn.className='query-btn'; btn.innerText = q;
                 btn.onclick = () => {
                     document.getElementById('i-res').innerText = (idx === 0 ? s.a1 : s.a2);
+                    // 답변 출력 후 스크롤을 맨 위로 올림
+                    document.getElementById('i-res').scrollTop = 0;
                     box.innerHTML = `<button class="next-btn" onclick="currentQ++; renderQs();">다음 단계</button>`;
                 };
                 box.appendChild(btn);
