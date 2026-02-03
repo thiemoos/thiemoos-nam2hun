@@ -22,7 +22,6 @@
         #bg-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; padding-top: 60px; }
         #scene-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         #clue-layer { position: absolute; z-index: 10; pointer-events: none; }
-        /* 단서 크기 50px로 수정 */
         .clue { position: absolute; width: 50px; height: 50px; transform: translate(-50%, -50%); background: transparent; pointer-events: auto; }
         
         .bottom-bar { position: absolute; bottom: 40px; display: flex; width: 100%; justify-content: center; gap: 20px; z-index: 100; }
@@ -32,26 +31,23 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; }
         #list-overlay { z-index: 1000; }
         #profile-overlay { z-index: 2000; background: rgba(0,0,0,0.9); }
-        .modal-card { width: 90%; max-height: 85%; background: #111; border: 1px solid var(--gold); position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* 프로필 카드 높이 고정 및 스크롤 설정 */
+        .modal-card { width: 90%; max-height: 80vh; background: #111; border: 1px solid var(--gold); position: relative; display: flex; flex-direction: column; overflow: hidden; }
         .close-x { position: absolute; top: 10px; right: 20px; font-size: 40px; color: var(--gold); z-index: 2100; }
         
-        /* 프로필 스크롤 적용 */
-        .p-header { width: 100%; height: 250px; background: #000; flex-shrink: 0; }
+        .p-header { width: 100%; height: 250px; background: #000; flex-shrink: 0; border-bottom: 1px solid #333; }
         .p-img-box { width: 100%; height: 100%; object-fit: contain; }
-        .p-body { padding: 25px; overflow-y: auto; text-align: left; line-height: 1.8; white-space: pre-wrap; font-size: 16px; color: #eee; flex: 1; }
+        .p-body { padding: 25px; overflow-y: auto; text-align: left; line-height: 1.8; white-space: pre-wrap; font-size: 16px; color: #eee; flex: 1; -webkit-overflow-scrolling: touch; }
 
-        /* 심문 인터페이스 세로 배치 및 스크롤 수정 */
+        /* 심문 인터페이스 */
         .inter-layout { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 60px 20px 20px 20px; }
         .inter-main { display: flex; flex-direction: column; flex: 1; gap: 10px; overflow: hidden; }
-        
         .i-name-tag { font-size: 22px; color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 5px; text-align: center; flex-shrink: 0; }
-        
-        .inter-left { width: 100%; height: 30%; flex-shrink: 0; } /* 얼굴 영역 */
+        .inter-left { width: 100%; height: 30%; flex-shrink: 0; }
         #i-img { width: 100%; height: 100%; object-fit: contain; }
-
         .inter-right { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
         .i-res-box { flex: 1; background: #111; padding: 15px; border: 1px solid #333; overflow-y: auto; text-align: left; font-size: 16px; line-height: 1.6; }
-        
         .i-btn-box { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding-bottom: 10px; }
         .query-btn { background: #1a1a1a; border: 1px solid var(--gold); padding: 12px; color: #fff; text-align: left; font-size: 14px; }
         .next-btn { background: var(--gold); color: #000; padding: 15px; font-weight: bold; }
@@ -108,7 +104,7 @@
     <div id="profile-overlay" class="overlay hidden">
         <div class="modal-card">
             <button class="close-x" onclick="closeProfile()">×</button>
-            <div id="profile-content" style="display:flex; flex-direction:column; height:100%;"></div>
+            <div id="profile-content" style="display:flex; flex-direction:column; height:100%; overflow:hidden;"></div>
         </div>
     </div>
 
@@ -146,7 +142,6 @@
     </div>
 
 <script>
-    // 데이터 섹션 (작가님 원본 그대로 유지)
     const data = {
         info: [
             "해송그룹 80주년 기념식에 사망사건이 발생했다.",
@@ -210,7 +205,7 @@
                 {q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"강연준 건축주가 회장님께 인사드릴 때 옆에서 같이 한 게 마지막이니까, 디너 때네요.", q2:"기념식에서 수상한 사람은 못 봤습니까?", a2:"굳이 고르라고 하면… 이돈이요. VIP 대기실에서 나오는 걸 봤거든요."}
             ], ending: "그가 버린 종이 조각은 그저 현장에서 느낀 공포의 파편이었을 뿐입니다. 겁에 질린 목격자를 범인으로 몰아세운 당신의 수사는 사건의 본질을 완전히 빗나갔습니다." },
             "천은호": { job: "통신과 계장", img: "https://i.ibb.co/k6G71YZW/IMG-7686.png", profile: "천은호(총독부 통신과)\n- 총독부 통신과 암호해독 담당\n- 고양이 ‘하나쨩’의 집사\n- 발 패티쉬가 있는 듯 함\n- 몸에 밴 애교가 많은 편\n- 소심한 성격으로 보임", questions: [
-                {q1:"기념식에서 수상한 사람은 못 봤습니까?", a1:"남두헌이 수상합니다. 하나쨩을 보고도 예뻐하지 않고 짜증만 냈어.", q2:"고양이를 기념식에 데려왔던데, 왜 데려온 겁니까?", a2:"하나쨩을 혼자 둘 순 없지 않나. 대기실에 두면 된다고 해서 데려왔네만.", q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"디너 때 인사드렸던 게 마지막이네.", q2:"피해자와 어떤 관계여서 기념식에 참석했습니까?", a2:"3차장님과 친분이 있으시더군. 3차장님 따라서 오게 되었네."},
+                {q1:"기념식에서 수상한 사람은 못 봤습니까?", a1:"남두헌이 수상합니다. 하나쨩을 보고도 예뻐하지 않고 짜증만 냈어.", q2:"고양이를 기념식에 데려왔던데, 왜 데려온 겁니까?", a2:"하나쨩을 혼자 둘 순 없지 않나. 대기실에 두면 된다고 해서 데려왔네만.", q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"디너 때 인사드렸던 게 마지막인 것 같소.", q2:"피해자와 어떤 관계여서 기념식에 참석했습니까?", a2:"3차장님과 친분이 있으시더군. 3차장님 따라서 오게 되었네."},
                 {q1:"사건이 일어난 시각에 어디 계셨습니까?", a1:"차장님과 대화를 나누다가 하나쨩이 복도를 돌아다닌다는 소리를 듣고 하나쨩을 찾으러 가려 했었소.", q2:"VIP 대기실에 들어간 적 있습니까?", a2:"들어간 적 없습니다."}
             ], ending: "알리바이가 확실한 인물을 범인으로 지목하기 위해 당신은 억지 논리를 펼쳤습니다. 무리한 끼워맞추기식 수사로 인해 죄 없는 시민이 고통받았고, 당신의 경찰 경력은 이 잘못된 수사와 함께 마침표를 찍게 되었습니다." }
         },
@@ -244,7 +239,6 @@
         const img = document.getElementById('scene-img');
         const layer = document.getElementById('clue-layer');
         const title = document.getElementById('scene-title');
-        
         title.innerText = s.name;
         img.src = s.img;
         img.onload = () => {
@@ -275,14 +269,17 @@
         const modal = document.getElementById('profile-overlay');
         document.getElementById('profile-content').innerHTML = `
             <div class="p-header"><img src="${data.suspects[name].img}" class="p-img-box"></div>
-            <div class="p-body"><strong>${name}</strong> (${data.suspects[name].job})\n\n${data.suspects[name].profile}</div>
+            <div class="p-body">
+                <strong style="color:var(--gold); font-size:18px;">${name}</strong> (${data.suspects[name].job})<br><br>${data.suspects[name].profile}
+            </div>
         `;
         modal.classList.remove('hidden');
+        document.querySelector('.p-body').scrollTop = 0;
     }
 
     function showList() {
         const modal = document.getElementById('list-overlay');
-        let html = `<div class="p-body"><h2 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0; flex-shrink:0;">용의자 명단</h2>`;
+        let html = `<div class="p-body"><h2 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0;">용의자 명단</h2>`;
         if(foundSus.length === 0) {
             html += `<p style="text-align:center; padding:20px;">아직 발견된 인물이 없습니다.</p>`;
         } else {
@@ -326,7 +323,6 @@
                 const btn = document.createElement('button'); btn.className='query-btn'; btn.innerText = q;
                 btn.onclick = () => {
                     document.getElementById('i-res').innerText = (idx === 0 ? s.a1 : s.a2);
-                    // 답변 출력 후 스크롤을 맨 위로 올림
                     document.getElementById('i-res').scrollTop = 0;
                     box.innerHTML = `<button class="next-btn" onclick="currentQ++; renderQs();">다음 단계</button>`;
                 };
@@ -361,18 +357,12 @@
         if(["알리바이","단독","시각","혼자"].some(k => reason.includes(k))) score++;
         if(reason.includes("과실치사")) score += 2;
         score = Math.min(score, 5);
-
         document.getElementById('reason-screen').classList.add('hidden');
         document.getElementById('ending-screen').classList.remove('hidden');
         const body = document.getElementById('end-body');
         const content = document.getElementById('ending-content');
-
         if(targetName === "남두헌") {
-            const msgs = [
-                "증거 불충분으로 인한 기소 기각.", "기소유예.", "벌금 2천만 원.",
-                "금고 1년, 집행유예 2년.", "금고 3년.",
-                "금고 5년. 사건 현장에 흩어진 파편들이 가리키는 진실을 정확히 꿰뚫었습니다. 권력을 이용해 현장을 은폐하려던 시도는 당신의 끈질긴 수사 앞에 무릎을 꿇었습니다. 이것은 경찰로서 당신이 기록한 정의의 승리입니다."
-            ];
+            const msgs = ["증거 불충분으로 인한 기소 기각.", "기소유예.", "벌금 2천만 원.", "금고 1년, 집행유예 2년.", "금고 3년.", "금고 5년. 사건 현장에 흩어진 파편들이 가리키는 진실을 정확히 꿰뚫었습니다. 권력을 이용해 현장을 은폐하려던 시도는 당신의 끈질긴 수사 앞에 무릎을 꿇었습니다. 이것은 정의의 승리입니다."];
             body.innerText = msgs[score];
             content.style.top = "-50px"; 
         } else {
