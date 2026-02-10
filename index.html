@@ -5,395 +5,305 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>파편의 기록</title>
     <style>
-        :root { --gold: #c5a059; --dark: #000000; --white: #ffffff; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--dark); color: var(--white); font-family: "Noto Serif KR", serif; overflow: hidden; }
-        
-        .full-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; background: #000; background-size: cover; background-position: center; }
-        .hidden { display: none !important; }
-        button { cursor: pointer; border: none; font-family: inherit; background: none; color: inherit; }
+        :root { --bg-color: #111111; --gold: #c5a059; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-color); color: white; font-family: 'Apple SD Gothic Neo', sans-serif; overflow: hidden; }
+        #game-container { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; position: absolute; }
+        .active { display: flex; }
 
-        /* 상단 내비게이션 바 */
-        .top-nav { position: absolute; top: 0; width: 100%; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.6); z-index: 200; border-bottom: 1px solid rgba(197, 160, 89, 0.3); }
-        .nav-arrow { font-size: 30px; color: var(--gold); padding: 10px; }
-        #scene-title { font-size: 18px; font-weight: bold; color: var(--gold); letter-spacing: 2px; }
+        /* 오프닝 타자기 */
+        #narra-box { width: 85%; text-align: center; line-height: 2; margin-top: 40%; font-size: 16px; white-space: pre-wrap; word-break: keep-all; }
 
-        /* 메인 게임 영역 */
-        #bg-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; padding-top: 60px; }
-        #scene-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        #clue-layer { position: absolute; z-index: 10; pointer-events: none; }
-        .clue { position: absolute; width: 50px; height: 50px; transform: translate(-50%, -50%); background: transparent; pointer-events: auto; }
-        
-        .bottom-bar { position: absolute; bottom: 40px; display: flex; width: 100%; justify-content: center; gap: 20px; z-index: 100; }
-        .bottom-btn { width: 150px; padding: 15px 0; border: 1px solid var(--gold); background: rgba(0,0,0,0.8); color: var(--gold); font-weight: bold; }
+        /* 탐색 UI */
+        .scene-bg { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; }
+        .clue-hit { position: absolute; background: transparent; border: none; cursor: pointer; z-index: 10; width: 70px; height: 70px; }
+        .nav-header { position: absolute; top: 30px; display: flex; align-items: center; gap: 40px; z-index: 20; color: var(--gold); }
+        .bottom-nav { position: absolute; bottom: 30px; display: flex; gap: 10px; z-index: 20; width: 90%; justify-content: center; }
+        .btn-gold { width: 45%; height: 45px; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; }
 
-        /* 모달 시스템 */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; }
-        #list-overlay { z-index: 1000; }
-        #profile-overlay { z-index: 2000; background: rgba(0,0,0,0.9); }
-        
-        .modal-card { width: 90%; max-height: 80vh; background: #111; border: 1px solid var(--gold); position: relative; display: flex; flex-direction: column; overflow: hidden; }
-        .close-x { position: absolute; top: 10px; right: 20px; font-size: 40px; color: var(--gold); z-index: 2100; }
-        
-        .p-header { width: 100%; height: 250px; background: #000; flex-shrink: 0; border-bottom: 1px solid #333; }
-        .p-img-box { width: 100%; height: 100%; object-fit: contain; }
-        .p-body { padding: 25px; overflow-y: auto; text-align: left; line-height: 1.8; white-space: pre-wrap; font-size: 16px; color: #eee; flex: 1; -webkit-overflow-scrolling: touch; }
+        /* 모달 및 엔딩 박스 공통 디자인 */
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: none; justify-content: center; align-items: center; }
+        .modal-content, .end-box { width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; color: white; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-        /* 심문 인터페이스 */
-        .inter-layout { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 60px 20px 20px 20px; }
-        .inter-main { display: flex; flex-direction: column; flex: 1; gap: 10px; overflow: hidden; }
-        .i-name-tag { font-size: 22px; color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 5px; text-align: center; flex-shrink: 0; }
-        .inter-left { width: 100%; height: 30%; flex-shrink: 0; }
-        #i-img { width: 100%; height: 100%; object-fit: contain; }
-        .inter-right { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-        .i-res-box { flex: 1; background: #111; padding: 15px; border: 1px solid #333; overflow-y: auto; text-align: left; font-size: 16px; line-height: 1.6; }
-        .i-btn-box { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding-bottom: 10px; }
-        .query-btn { background: #1a1a1a; border: 1px solid var(--gold); padding: 12px; color: #fff; text-align: left; font-size: 14px; }
-        .next-btn { background: var(--gold); color: #000; padding: 15px; font-weight: bold; }
+        .prof-img { width: 180px; height: 220px; object-fit: cover; border: 1px solid #333; margin-bottom: 15px; }
 
-        /* 타이틀 & 정보 */
-        #title-screen h1 { font-size: 45px; letter-spacing: 12px; margin: 0; color: #fff; }
-        #start-prompt { margin-top: 50px; color: rgba(255,255,255,0.5); font-size: 16px; }
-        #info-text { padding: 40px; font-size: 20px; line-height: 2; white-space: pre-wrap; word-break: keep-all; }
+        /* 심문 UI */
+        .inter-upper { height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; flex-shrink: 0; }
+        .inter-img-fixed { width: 200px; height: 250px; object-fit: cover; border: 1px solid #333; }
+        .inter-lower { flex-grow: 1; width: 100%; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; background: #161616; }
+        .q-display { color: var(--gold); font-size: 11px; height: 35px; margin-bottom: 5px; overflow: hidden; }
+        .ans-display { font-size: 14px; height: 120px; overflow-y: auto; margin-bottom: 15px; line-height: 1.6; border-bottom: 1px solid #333; }
+        .q-area { display: flex; flex-direction: column; gap: 8px; height: 110px; }
+        .q-btn-item { background: rgba(197, 160, 89, 0.1); border: 1px solid var(--gold); color: white; padding: 12px; text-align: left; font-size: 13px; cursor: pointer; width: 100%; }
 
-        /* 결과/엔딩 */
-        #arrest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; max-height: 70%; overflow-y: auto; padding: 10px; }
-        .arrest-card { background: #111; border: 1px solid #333; padding: 10px; }
-        .reason-box { width: 90%; height: 200px; background: #111; color: #fff; border: 1px solid var(--gold); padding: 20px; font-size: 16px; margin: 20px 0; }
-        #ending-content { width: 85%; position: relative; transition: all 0.5s; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; }
+        /* 체포 인물 선택 */
+        .sus-select-grid { display: flex; overflow-x: auto; gap: 10px; width: 95%; padding: 10px 0; margin-bottom: 10px; }
+        .sus-card { flex: 0 0 80px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; transition: 0.3s; }
+        .sus-card.selected { opacity: 1; transform: scale(1.1); }
+        .sus-card img { width: 60px; height: 75px; object-fit: cover; border: 1px solid #444; }
+        .sus-card.selected img { border-color: var(--gold); }
+        .sus-card span { font-size: 11px; }
+
+        /* 엔딩 화면 전용 스타일 */
+        .end-bg { width: 100%; height: 100%; background-size: cover; background-position: center; position: absolute; }
+        #end-container { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 30; }
+        .end-box { max-height: 80%; overflow-y: auto; text-align: center; line-height: 1.6; }
+        .end-box.top { align-self: flex-start; margin-top: 50px; } /* 남두헌 전용 위치 */
+        .end-box.center { align-self: center; } /* 일반 용의자 위치 */
+        .report-text { text-align: left; font-size: 14px; width: 100%; white-space: pre-wrap; word-break: keep-all; }
     </style>
 </head>
 <body>
 
-    <div id="discovery-alert" style="position:fixed; top:70px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; padding:15px 30px; font-weight:bold; z-index:5000; display:none;"></div>
-
-    <div id="title-screen" class="full-screen" onclick="startStory()">
-        <h1>파편의 기록</h1>
-        <div id="start-prompt">화면을 터치하여 시작하십시오.</div>
+<div id="game-container">
+    <div id="scr-start" class="screen active" onclick="showScreen('scr-input')">
+        <h1 style="margin-top:40%; letter-spacing: 5px;">파편의 기록</h1><p style="opacity: 0.5;">터치하여 시작</p>
     </div>
 
-    <div id="info-screen" class="full-screen hidden" onclick="showNextInfo()">
-        <div id="info-text"></div>
+    <div id="scr-input" class="screen" style="justify-content: center;">
+        <p>이름을 입력하십시오</p>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input type="text" id="ln" placeholder="성" style="width: 60px; background: transparent; border:none; border-bottom:1px solid white; color:white; text-align:center;">
+            <input type="text" id="fn" placeholder="이름" style="width: 100px; background: transparent; border:none; border-bottom:1px solid white; color:white; text-align:center;">
+        </div>
+        <button class="btn-gold" style="width: 100px;" onclick="initGame()">➔</button>
     </div>
 
-    <div id="main-game" class="full-screen hidden">
-        <div class="top-nav">
-            <button class="nav-arrow" onclick="nav(-1)">&#10094;</button>
-            <div id="scene-title">장소 이름</div>
-            <button class="nav-arrow" onclick="nav(1)">&#10095;</button>
-        </div>
+    <div id="scr-narra" class="screen" onclick="skipNarra()"><div id="narra-box"></div></div>
 
-        <div id="bg-container">
-            <img id="scene-img">
-            <div id="clue-layer"></div>
-        </div>
-        <div class="bottom-bar">
-            <button class="bottom-btn" onclick="showList()">용의자 명단</button>
-            <button class="bottom-btn" onclick="startInter()">용의자 심문</button>
+    <div id="scr-main" class="screen">
+        <div id="main-bg" class="scene-bg"></div>
+        <div class="nav-header"><span onclick="changeScene(-1)">◀</span> <span id="place-name"></span> <span onclick="changeScene(1)">▶</span></div>
+        <div id="hit-layer" style="width:100%; height:100%; position:absolute;"></div>
+        <div class="bottom-nav">
+            <button class="btn-gold" onclick="openSusList()">용의자 명단</button>
+            <button class="btn-gold" onclick="openInter()">용의자 심문</button>
         </div>
     </div>
 
-    <div id="list-overlay" class="overlay hidden">
-        <div class="modal-card">
-            <button class="close-x" onclick="closeList()">×</button>
-            <div id="list-content" style="overflow-y:auto; flex:1;"></div>
+    <div id="scr-inter" class="screen" style="background: black;">
+        <div class="inter-upper">
+            <h3 id="inter-name" style="color: var(--gold); margin: 5px 0;"></h3>
+            <img id="inter-img" class="inter-img-fixed" src="">
+        </div>
+        <div class="inter-lower">
+            <div id="inter-q-top" class="q-display"></div>
+            <div id="inter-ans" class="ans-display"></div>
+            <div id="inter-q-btns" class="q-area"></div>
         </div>
     </div>
 
-    <div id="profile-overlay" class="overlay hidden">
-        <div class="modal-card">
-            <button class="close-x" onclick="closeProfile()">×</button>
-            <div id="profile-content" style="display:flex; flex-direction:column; height:100%; overflow:hidden;"></div>
-        </div>
+    <div id="scr-report" class="screen" style="padding-top: 20px;">
+        <h3 style="color: var(--gold); margin-bottom: 5px;">혐의 판단 보고서</h3>
+        <p style="font-size: 11px; color: #888;">범인을 지목하십시오</p>
+        <div id="sus-select-grid" class="sus-select-grid"></div>
+        <input type="text" id="rep-title" placeholder="죄목을 적으십시오" style="width: 85%; margin-bottom: 8px; background: #222; border: 1px solid var(--gold); color: white; padding: 10px;">
+        <textarea id="rep-body" style="width: 85%; height: 180px; background: #222; border: 1px solid var(--gold); color: white; padding: 10px;" placeholder="상세 혐의를 적으십시오"></textarea>
+        <button class="btn-gold" style="margin-top: 10px; width: 85%;" onclick="judge()">판결 요청</button>
     </div>
 
-    <div id="inter-screen" class="full-screen hidden">
-        <div class="inter-layout">
-            <div id="i-name" class="i-name-tag"></div>
-            <div class="inter-main">
-                <div class="inter-left">
-                    <img id="i-img" style="border:1px solid #333;">
-                </div>
-                <div class="inter-right">
-                    <div id="i-res" class="i-res-box"></div>
-                    <div id="i-btns" class="i-btn-box"></div>
-                </div>
+    <div id="scr-end" class="screen">
+        <div id="end-bg" class="end-bg"></div>
+        <div id="end-container">
+            <div id="end-msg-box" class="end-box">
+                <div id="end-msg" style="white-space: pre-wrap;"></div>
             </div>
         </div>
     </div>
 
-    <div id="arrest-screen" class="full-screen hidden">
-        <h2 style="color:var(--gold); margin-bottom:30px;">기소 인물 지목</h2>
-        <div id="arrest-grid"></div>
-    </div>
-
-    <div id="reason-screen" class="full-screen hidden">
-        <h3 style="color:var(--gold);">기소 사유를 입력하십시오.</h3>
-        <textarea id="reason-input" class="reason-box"></textarea>
-        <button class="bottom-btn" style="width:200px;" onclick="judge()">기소 확인</button>
-    </div>
-
-    <div id="ending-screen" class="full-screen hidden">
-        <div id="ending-content">
-            <h2 id="end-title" style="color:var(--gold); font-size:28px;">수사 결과 보고</h2>
-            <p id="end-body" style="font-size:18px; line-height:2;"></p>
-        </div>
-    </div>
+    <div id="modal-list" class="modal" onclick="closeModal('modal-list')"><div class="modal-content" onclick="event.stopPropagation()"><h3 style="color: var(--gold); border-bottom: 1px solid var(--gold); width: 100%; text-align: center; padding-bottom: 10px;">용의자 명단</h3><div id="list-items" style="width: 100%; overflow-y: auto; max-height: 400px;"></div></div></div>
+    <div id="modal-profile" class="modal" onclick="closeModal('modal-profile')"><div class="modal-content" onclick="event.stopPropagation()"><img id="p-img" class="prof-img" src=""><h3 id="p-name" style="margin: 5px 0;"></h3><p id="p-job" style="font-size: 11px; color: var(--gold); margin-bottom: 15px;"></p><p id="p-desc" style="font-size: 14px; text-align: center; line-height: 1.6;"></p></div></div>
+</div>
 
 <script>
-    const data = {
-        info: [
-            "해송그룹 80주년 기념식에 사망사건이 발생했다.",
-            "피해자는 해송그룹 회장 권재규.",
-            "시신 발견 장소는 VIP 대기실.",
-            "사망 원인 추정으로는 둔상에 의한 두부 외상.",
-            "테이블에 머리를 부딪힌 후, 사망하였다.",
-            "현장 검증에서 나온 정보에 의하면, 다툼의 흔적이 보인다고 했다.",
-            "당신은 형사입니다.",
-            "단서를 찾아 용의자를 추려 범인을 찾으세요."
-        ],
-        suspects: {
-            "권현조": { job: "해송그룹 대표이사", img: "https://i.ibb.co/JWCprMN9/IMG-7677.png", profile: "권현조(해송그룹 대표이사)\n- 대중적인 이미지는 좋은 편\n- 차남 권민조 사망 이후 해송의 후계자로 낙점\n- 은국병원 딸과 혼인\n- 해송그룹 80주년 기념식에서 권 회장의 은퇴와 함께 취임할 예정", questions: [
-                {q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"디너쇼 할 때가 마지막입니다.", q2:"VIP 대기실에 들어간 적 있습니까?", a2:"나 해송그룹 대표이사야. 곧 해송그룹을 물려받을 사람. 안 들어갔겠어?"},
-                {q1:"피해자가 가지고 있던 건데, 권현조 씨 만년필 맞죠?", a1:"네, 맞아요.", q2:"사건이 일어난 시각에 어디 계셨습니까?", a2:"내 방에서 윤 비서랑 있었습니다."},
-                {q1:"기념식 직전, 피해자와 어떤 대화를 나눴습니까?", a1:"실수하지 말라는 말, 그런 거 나눴던 것 같네요.", q2:"VIP 대기실에 마지막으로 들어간 게 언제입니까?", a2:"아버지가 갑자기 볼 사람이 있다고 해서 디너 이후로는 전부 VIP 대기실 근처로 못 오게 했습니다. 그래서 저녁 전이 마지막입니다."},
-                {q1:"만년필은 언제 잃어버린 겁니까?", a1:"모릅니다. 내가 펜이 한두 개인가.", q2:"기념식에서 수상한 사람은 못 봤습니까?", a2:"회장실 들어가려고 했던 영진호. 누가 봐도 수상하지 않아요?"}
-            ], ending: "유가족을 범으로 지목한 것은 경찰로서 최악의 선택이었습니다. 슬픔에 잠긴 유족을 가해자로 몰아세운 당신의 수사 결과에 여론은 들끓었고, 당신은 인륜을 저버린 수사관으로 낙인찍혔습니다. 유족의 상처는 영원히 씻기지 않을 것입니다." },
-            "김무진": { job: "기자", img: "https://i.ibb.co/Q3mYQbrp/IMG-7678.png", profile: "김무진(36세, 주간지[한주간] 기자)\n- 조회수를 높일 수 있는 자극적인 사건, 이른바 특종을 위해 움직이는 편\n- 포털에 기획 기사를 연재 중\n- 고등학생 시절, 본인이 살던 마을에서 연쇄살인 사건이 일어난 적 있음\n- ‘연주시 연쇄살인 사건’의 범인은 친구의 아버지, 자살로 사건 종결\n- 연재 중인 기사가 ‘연주시 연쇄살인 사건’으로 아직까지 관심을 가지고 있는 것으로 보아, 살인사건과 관련이 있어 보임", questions: [
-                {q1:"기념식 내내 캠코더를 들고 촬영하면서 다녔다고 하던데, 맞습니까?", a1:"네. 이런 곳은 처음 오기도 하고, 기사에 쓸 내용이 있을까 싶어서 찍고 다녔습니다.", q2:"VIP 대기실에 들어간 적 있습니까?", a2:"아니요. 저는 VIP가 아니라서."},
-                {q1:"사건이 일어난 시각에 어디 계셨습니까?", a1:"연회장에서 다른 기자분들과 기사 작성 중이었을 거예요.", q2:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a2:"회장님을 마지막으로 본 게… 디너 때 멀리서 뵌 게 마지막인 것 같아요."},
-                {q1:"영상 저장은 자동입니까, 수동입니까?", a1:" 자동으로 테이프에 저장이 돼요. 근데 사람들이 갑자기 소리 지르고 그래서 캠코더를 두고 갔었는데 다녀오니까 테이프가 사라져 서 영상은 없습니다.", q2:"캠코더를 다른 사람에게 잠깐이라도 맡긴 적 있습니까?", a2:"아니요, 제가 계속 들고 다녔어요."},
-                {q1:"기념식에서 수상한 사람은 못 봤습니까?", a1:"기념식인데 술만 엄청 마시는 분이 있더라고요. 이름이.. 사철성이었나?", q2:"VIP 대기실 앞에서도 촬영했었습니까?", a2:"그 복도를 지나가면서 찍고 있었는데 어떤 남자가 VIP 대기실에 들어가더라고요. 그러자마자 갑자기 경호원들이 나타나서 지금 여기 출입 금지라고 해서 홀로 갔었어요."}
-            ], ending: "그가 들고 있던 것은 흉기가 아니라 현장을 기록하던 캠코더였습니다. 소중한 취재 장비를 뺏긴 피해자를 가해자로 만든 잘못된 수사입니다. 경찰이 진실을 입막음했다는 비난 속에 수사팀은 해체되었고, 진실은 영원히 묻혔습니다." },
-            "남두헌": { job: "부장검사", img: "https://i.ibb.co/fVs1vJnX/IMG-7679.png", isCulprit: true, profile: "남두헌(40세, 부산남부지청 부장검사)\n- 지방대 지리학과 출신\n- 서초동에서 왕따라는 소문이 있음\n- 비교적 젊은 나이에 초고속 승진\n- 정검계, 거물급 인사들의 수사가 진행됐음에도 기소가 된 적이 없음\n- 딸기스무디를 매일 마심\n- 취미로는 바둑과 테니스\n- 커넥션이 있어 보이나 심증만 있고, 물증은 없는 상태", questions: [
-                {q1:"사건이 일어난 시각에 어디 계셨습니까?", a1:"대기실서 담배 피우고 있었나? 그랬을 기다.", q2:"VIP 대기실에 들어간 적 있습니까?", a2:"없는데?"},
-                {q1:"기념식 도중에 자리를 벗어난 적 있습니까?", a1:"흡연자라 담배 피울라꼬 몇 번 나갔었는데. 와, 뭐 안 되나. ", q2:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a2:"정확히는 모리겠는데, 피해자를 마지막으로 본 게… 저녁 물 때 보고, 그 이후로는 몬 본 것 같은데."},
-                {q1:"기념식에서 수상한 사람 못 봤습니까?", a1:"몬 봤다.", q2:"안경알이 하나가 없는데, 왜 그런 겁니까?", a2:"아, 뭐… 넘어질라카다가 중심은 잡았는데 안경이 떨어지가 하나가 깨짔다."},
-                {q1:"피해자와는 어떤 관계여서 기념식에 참석하셨습니까?", a1:"초대를 받았으니까네 오지. 니 내 의심하나. 경찰 섀끼들이 여 있어 주니까네 내가 눈지 모리는갑네?", q2:"재떨이에 같은 종류의 담배꽁초가 많던데, 전부 본인 것 맞습니까?", a2:"내 거 맞아요. 뭐 담배 쫌 마이 피운다꼬 문제가 됩니까? 대기실서 피워도 된다캐가 피운 긴데. 별 쓰잘띠 없는 질문을 다 하고 자빠짔네."}
-            ]},
-            "병구": { job: "일일 알바생", img: "https://i.ibb.co/qFBgX90y/IMG-7684.png", profile: "병구\n- 짜파게티 좋아함\n- 짜파게티 잘 끓임\n- 무거운 물건 잘 들 수 있음\n- 잠이 많은 편\n- 바가지 머리가 특징", questions: [
-                {q1:"어떤 이유로 알바를 하게 된 거예요?", a1:"밥도 주고… 시급도 많이 쳐준다고 해서요.", q2:"짜파게티 좋아해요?", a2:"네!"},
-                {q1:"수상한 사람 못 봤어요?", a1:"권현조 대표이사님이요, 어떤 여성분이랑 엄청 다정하게 껴안으면서 사라지셨어요. 아내분은 아니던데….", q2:"VIP 대기실에는 언제 마지막으로 갔어요?", a2:"서빙하려고 하는데 어떤 분이 청소하라고 하셔서 그때 간 게 마지막이에요."},
-                {q1:"혼나러 온 거 아니니까 주눅 들지 않아도 돼요.", a1:"넵….", q2:"사건이 일어난 시각에 어디 있었어요?", a2:"알바생들 대기하는 곳에서 다른 사람들이랑 도시락 먹고 있었어요."},
-                {q1:"짜파게티 잘 끓여요?", a1:"네! 진짜 잘 끓여요!", q2:"머리는 왜 그래요?", a2:"네? 어… 네?"}
-            ], ending: "단지 머리빗을 떨어뜨렸다는 이유로 현장에서 열심히 일하던 청년을 살인자로 몰았습니다. 힘없는 시민에게 책임을 전가한 당신의 수사 기록은 경찰 역사상 최악의 수치로 남을 것입니다. 당신의 잘못된 수사가 한 청년의 인생을 송두리째 꺾어놓았습니다." },
-            "사철성": { job: "철썩", img: "https://i.ibb.co/B5SvKvZX/IMG-7680.png", profile: "사철성\n- 폭력 전과 2범\n- 뺨을 잘 때린다고 해서 ‘철썩’이라는 별명 소유\n- 동남 방언을 사용하고 중국어를 유창하게 구사\n- 어머니가 당뇨로 사망, 유전으로 인한 당뇨가 있을 수 있음\n- 한중 혼혈", questions: [
-                {q1:"사건이 일어난 시각에 어디 계셨습니까?", a1:"연회장에서 술 마시고 있었습니다.", q2:"테이블에 술병이 많던데, 혼자 마신 겁니까?", a2:"예. 내 혼자 다 마싰습니다."},
-                {q1:"VIP 대기실에 들어간 적 있습니까?", a1:"저는예, 연회장을 벗어난 적이 없습니다.", q2:"피해자와는 어떤 관계여서 기념식에 참석하셨습니까?", a2:"예전에 형님이랑 술 한잔했다 아입니까. 물론 둘이서 마신 건 아인데, 그 공간에 같이 있었으니까. 회장님이랑은 그런 사입니다."},
-                {q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"저녁 먹을 때인가? 그때 형님께 인사 함 드리고 몬 봤습니다.", q2:"기념식에서 수상한 사람은 못 봤습니까?", a2:"디너쇼인데 밥은 안 먹고 돌아댕기던 사람이 있었습니다. 남두헌이랬나…. 밥이 이렇게 맛있는데."}
-            ], ending: "술에 취한 사람을 범인으로 몰기는 쉬웠을 겁니다. 하지만 그는 그저 연회장의 손님이었을 뿐입니다. 명확한 증거 없이 취객을 범인으로 확신한 당신의 수사는 논리보다 편견이 앞선 잘못된 수사였습니다." },
-            "영진호": { job: "프리랜서", img: "https://i.ibb.co/5X5FTKqx/IMG-2756.png", profile: "영진호(프리랜서 카메라맨)\n- 전 언론인\n- 아파트 부실 공사를 취재하고 폭로하려고 했으나 실패한 적 있음\n- 현재 거주 중인 아파트에 당시 담당 검사가 거주 중\n- 신체에 문신이 많고 운동을 자주 하는 걸로 보임", questions: [
-                {q1:"상처는 어쩌다 생긴 겁니까?", a1:"회장실 들어가려고 했더니 그 앞을 지키고 있던 경호원이 때려서.", q2:"기념식에서 수상한 사람은 못 봤습니까?", a2:"VIP 대기실로 가는 복도 기웃거리면서 영상 찍던 김무진 기자요."},
-                {q1:"VIP 대기실에 들어간 적 있습니까?", a1:"기자가 거길 무슨 수로 가요. 없습니다.", q2:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a2:"회장님은 기념식 시작했을 때만 뵙고 못 봤습니다."},
-                {q1:"사건이 일어난 시각에 어디 계셨습니까?", a1:"회장실 들어가려고 했다니까요. 지키고 있던 경호원들이 앉아서 졸고 있길래 몰래 들어가려고 했더니, 갑자기 쿵 소리가 크게 나서 그 새끼들이 다 깼습니다. 그래서 이렇게 됐고.", q2:"피해자와는 어떤 관계여서 기념식에 참석하셨습니까?", a2:"기자이라고 하니까 들여보내 주던데요?"}
-            ], ending: "현장에서 묵묵히 자리를 지키던 인물을 지목한 당신의 수사는 억측에 불과했습니다. 그는 사건과 무관한 증언자였으나, 당신의 무리한 수사로 인해 평범한 삶이 파괴되었습니다. 경찰의 공신력은 바닥으로 추락했습니다." },
-            "이돈": { job: "변호사", img: "https://i.ibb.co/Gfqz8GD6/IMG-7687.png", profile: "이돈(37세, 법무법인 ML 변호사)\n- 가성그룹 가성호 회장의 전속 변호사(입주 변호사)\n- 젊은 시절 가성호 회장에게 장학금을 받은 적이 있음\n- 고용인과의 갈등이 자주 있었음\n- 업무상 횡령 혐의로 긴급 체포된 적 있음\n- 계약 상대인 가성호 회장이 사망 후에도 회장의 저택에서 젊은 사모님과 거주", questions: [
-                {q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"식사를 한 후에 회장님께서 VIP 대기실에 계신다는 얘기를 듣고 찾아가 인사를 드렸습니다. 이때가 마지막입니다.", q2:"피해자가 사망 당시 손수건을 쥐고 있었는데, 이 손수건 이돈 씨 손수건 맞습니까?", a2:"예, 제 거 맞습니다. 회장님이 땀을 많이 흘리셔서 잠시 빌려드렸습니다."},
-                {q1:"사건이 일어난 시각에 어디 계셨습니까?", a1:"연회장에서 다른 분들께 인사를 드리고 있었습니다.", q2:"기념식에서 수상한 사람은 못 봤습니까?", a2:"이성조 씨가 수상해 보였습니다. 허리를 숙였을 때 허리춤이 살짝 불룩했어요."},
-                {q1:"VIP 대기실에 들어간 적 있습니까?", a1:"예, 가성호 회장님께서 직접 오실 수가 없어 대신 온 것에 대한 사과와 축하드리기 위해 VIP 대기실 안으로 들어갔습니다.", q2:"피해자와는 어떤 관계여서 기념식에 참석하셨습니까?", a2:"가성호 회장님의 대리인으로 참석했습니다."},
-                {q1:"피해자와 마지막으로 나눈 대화가 뭐였습니까?", a1:"곧 손님이 오기로 했다며 자리를 비켜달라고 했었습니다.", q2:"손수건은 언제 빌려드린 겁니까?", a2:"VIP 대기실에서 인사를 드릴 때 빌려드렸습니다."}
-            ], ending: "그의 동선이 수상하다는 심증만으로 변호사를 기소한 대가는 가혹했습니다. 그는 자신의 결백을 완벽히 입증했고, 당신은 무리한 수사에 대해 책임을 지고 경찰 제복을 벗어야 했습니다." },
-            "이성조": { job: "프리랜서", img: "https://i.ibb.co/m5QH6BJv/IMG-2757.png", profile: "이성조(프리런서)\n- 용병 출신\n- 총기를 잘 다룸(특히 저격)\n- 전라도 출신으로 서남방언 구사\n- 도벽 있음", questions: [
-                {q1:"사건 시각에 어디 계셨습니까?", a1:"그, 뭐냐. 연회장에 있었는디?", q2:"VIP 대기실에 들어간 적 있습니까?", a2:"최초 발견자가 나잖어."},
-                {q1:"피해자와는 어떤 관계여서 기념식에 참석했습니까?", a1:"회장 아들 권현조가 나의 고ㄱ… 고구마. 고구마 같은 존재인디, 지 회장 되는 꼴을 보러 오라는데. 할 거 없응게 와야지.", q2:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a2:"우연히 그 앞을 지나다가 누가 있는 것 같길래 들어갔는디, 쓰러져 있는 걸 본 게 마지막입니다."},
-                {q1:"사건 현장에 발자국이 찍혀 있고, 피해자의 귀중품이 사라졌습니다. 아는 거 없습니까?", a1:"거 피 밟고 한 건 내가 맞는디, 귀중품은 나도 몰러요. 사람이 죽었는디 누가 그런 걸 보고 있겄어.", q2:"기념식에서 수상한 사람은 못 봤습니까?", a2:"화장실을 갔는디 조태주가 화들짝 놀래면서 도망가든데. 수상하지 않어?"}
-            ], ending: "피해자와의 과거 인연이나 사적인 배경에만 매몰된 수사였습니다. 현장의 실질적인 증거물들을 외면한 채 특정 인물을 표적으로 삼은 당신의 집착이 결국 죄 없는 사람을 범죄자로 만들고 말았습니다." },
-            "조태주": { job: "건설교통국장", img: "https://i.ibb.co/PGxZ6KDK/IMG-7683.png", profile: "조태주(강원도 건설교통국장)\n- 주상숙 강원도지사와 연이 있음\n- 패션 센스가 다소 많이 떨어지는 편\n- 르강원 건설을 앞당기려고 함\n- 르강원 건축주인 강연준과 커넥션이 있어 보임", questions: [
-                {q1:"피해자와는 어떤 관계여서 기념식에 참석했습니까?", a1:"강연준 건축주와 개인적 친분이 있어서 같이 오게 되었습니다.", q2:"CCTV에 이 종이 버리는 모습이 찍혔는데, 왜 버린 겁니까?", a2:"괜한 일에 엮이는 건 아닌가 싶어서 버렸습니다. 화장실 칸에 들어갔는데 변기 옆에 종이가 있었고, 쓰레기통에는 테이프가 있었어요. 내용이… [갑 권재규(이하 갑이라 한다.)와 을]이랑 [을은 갑이 원하는 사ㄱ], [무슨 일이 있어도 불기] 이렇게 쓰여 있길래 혹시나 해서 갖고 있었는데 괜히 의심받을 것 같아서요."},
-                {q1:"VIP 대기실에 들어간 적 있습니까?", a1:"아니요, 저는 간 적 없어요.", q2:"사건이 일어난 시각에 어디 계셨습니까?", a2:"연회장에 있었습니다. 제 옆 테이블에 술 엄청 드시던 분 계셨는데, 그분께 여쭤보세요."},
-                {q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"강연준 건축주가 회장님께 인사드릴 때 옆에서 같이 한 게 마지막이니까, 디너 때네요.", q2:"기념식에서 수상한 사람은 못 봤습니까?", a2:"굳이 고르라고 하면… 이돈이요. VIP 대기실에서 나오는 걸 봤거든요."}
-            ], ending: "그가 버린 종이 조각은 그저 현장에서 느낀 공포의 파편이었을 뿐입니다. 겁에 질린 목격자를 범인으로 몰아세운 당신의 수사는 사건의 본질을 완전히 빗나갔습니다." },
-            "천은호": { job: "통신과 계장", img: "https://i.ibb.co/k6G71YZW/IMG-7686.png", profile: "천은호(총독부 통신과)\n- 총독부 통신과 암호해독 담당\n- 고양이 ‘하나쨩’의 집사\n- 발 패티쉬가 있는 듯 함\n- 몸에 밴 애교가 많은 편\n- 소심한 성격으로 보임", questions: [
-                {q1:"기념식에서 수상한 사람은 못 봤습니까?", a1:"남두헌이 수상합니다. 하나쨩을 보고도 예뻐하지 않고 짜증만 냈어.", q2:"고양이를 기념식에 데려왔던데, 왜 데려온 겁니까?", a2:"하나쨩을 혼자 둘 순 없지 않나. 대기실에 두면 된다고 해서 데려왔네만.", q1:"사건 당일, 피해자를 마지막으로 본 게 언제입니까?", a1:"디너 때 인사드렸던 게 마지막인 것 같소.", q2:"피해자와 어떤 관계여서 기념식에 참석했습니까?", a2:"3차장님과 친분이 있으시더군. 3차장님 따라서 오게 되었네."},
-                {q1:"사건이 일어난 시각에 어디 계셨습니까?", a1:"차장님과 대화를 나누다가 하나쨩이 복도를 돌아다닌다는 소리를 듣고 하나쨩을 찾으러 가려 했었소.", q2:"VIP 대기실에 들어간 적 있습니까?", a2:"들어간 적 없습니다."}
-            ], ending: "알리바이가 확실한 인물을 범인으로 지목하기 위해 당신은 억지 논리를 펼쳤습니다. 무리한 끼워맞추기식 수사로 인해 죄 없는 시민이 고통받았고, 당신의 경찰 경력은 이 잘못된 수사와 함께 마침표를 찍게 되었습니다." }
-        },
-        scenes: [
-            { name: "VIP 대기실", img: "https://i.ibb.co/WpRtmMT3/B5-CD1-E8-F-7-B3-F-4-D7-D-9093-9-F35652911-BC.png", clues: [{x:0.64, y:0.44, t:"권현조"}, {x:0.68, y:0.39, t:"병구"}, {x:0.85, y:0.79, t:"이성조"}, {x:0.25, y:0.62, t:"이돈"}]},
-            { name: "연회장", img: "https://i.ibb.co/KjrY49Jz/A58-F7-D87-8721-4-CFA-87-F2-72-BEBAE9-B94-D.png", clues: [{x:0.33, y:0.55, t:"영진호"}, {x:0.76, y:0.47, t:"사철성"}, {x:0.22, y:0.47, t:"김무진"}, {x:0.19, y:0.61, t:"조태주"}]},
-            { name: "일반 대기실", img: "https://i.ibb.co/prz24QCD/IMG-1395.png", clues: [{x:0.59, y:0.61, t:"남두헌"}, {x:0.15, y:0.78, t:"천은호"}]}
-        ]
-    };
+const suspects = {
+    "권현조": { job: "해송그룹 대표이사", img: "https://i.ibb.co/JWCprMN9/IMG-7677.png", profile: "지금 이 사태를 어떡할 거야? 응? 하필 아버지 은퇴 결심한 이 타이밍에. 너 같은 새끼한테 그 자리를 내주실 것 같아? 권현조, 네가 끝내야 해. 한방에 정리하라고, 응?", ans: ["내 사무실에서 업무 좀 봤습니다. 윤 비서도 잠깐 왔었으니까, 물어보면 알 거예요.", "마지막이… 디너 때일 겁니다. 아버지께서 피곤하시다고 잠시 쉬고 오신다기에 알겠다고 했죠.", "거긴 열어놓은 적 없는데. 아버지가 열었나? 냉기는 모르겠어요.", "내 사무실이랑 층이 달라서, 난 들은 적 없어요.", "그건 모르겠네요. 아버지가 아무도 들이지 말라고 해서 그쪽 근처에도 안 가서요.", "오늘따라 피로감을 많이 느끼시긴 했습니다. 그거 말고는 모르겠네요.", "… 누가 그래요? 장남인 내가 회사를 물려받는 게 당연한 건데 왜 다툼을 해. 이 회사는 이제 내 건데. 아버지 돌아가셨으니까, 빠르게 장례 치르고 회사도 그에 맞춰서 움직여야 합니다. 그쪽 이름이… [성][이름]? [성][이름] 형사, 이 조사 좀 빨리 끝낼 수 없나? 바쁜 사람 붙잡아두고 뭔 질문이 이렇게 많아.", "아버지가 나한테 얘기를 안 했는데 내가 어떻게 압니까? 가족이라고 모든 병명을 다 알진 않잖아요. 그깟 빈혈이 뭐라고. 난 모릅니다. 이제 가 봐도 되죠?"] },
+    "김무진": { job: "36세, 주간지[한주간] 기자", img: "https://i.ibb.co/Q3mYQbrp/IMG-7678.png", profile: "아무리 바란들 자루 안에 들어있던 사람은 고라니로 바뀌지 않아요. 우리는 진실을 밝혀야 할 의무가 남아있는 사람들이에요. 그 의무가 다 끝날 때까지 버티세요.", ans: ["그냥… 이리저리 돌아다녔어요. 기사… 쓸 게 있나… 하고.", "디너 때 뵙고 못 봤던 것 같아요. 대화는 못 해 봤고요. 돌아다닐 때도 마주친 적 없었어요.", "창문을요? 오늘 영하 12도였나 그랬는데. 바람도 많이 불고. 내부가 따뜻해서 바람이 불었으면 바로 눈치챘을 텐데 느낀 적 없었어요.", "돌아다닐 때는 그런 소리 못 들었던 것 같아요.", "글쎄요… 없던 것 같은데…. 아, 누가 VIP 대기실 들어가는 걸 봤어요. 회장님 뒷모습은 아니던데. 남자 뒷모습이었어요. 근데 거의 다 들어간 상태라 누구인지는 모르겠어요. 그때 아마 20시 10분 조금 넘었을 때일걸요.", "다른 사람과 인사를 나눌 때는 괜찮아 보이셨는데, 인사가 끝나면 살짝 인상을 쓰셨던 것 같아요. 근데 이런 건 다들 피곤하면 그럴 수 있잖아요. 다른 분들과 대화를 나누실 때도 며칠 잠을 설쳤다고 하셨고요. 이런 거 말고는 없었어요.", "아… 전화는…. 고향 친구한테 연락이 와서 잠시 통화 좀 했어요. 내용까지 얘기해야 해요? 개인적인 건데…. 그냥 언제까지 어디로 와라, 이런 전화였어요. 근데 지금 기념식에 있어서 지금 못 간다고 전했죠.", "예? 그걸 [성] 형사님이 어떻게…. 이건 그냥 개인적으로 조사 중이었던 건데…. 기사로 쓰려고 그랬던 거지, 제가 그 안에 들어가거나 하진 않았어요. 정말이에요."] },
+    "남두헌": { job: "40세, 부산 남부지청 부장검사", img: "https://i.ibb.co/fVs1vJnX/IMG-7679.png", profile: "“완벽한 공정이라는 사실 잊지 마라” 지랄병 하고 앉아 있네. 세상 엿 바까 문 지 천 년도 더 됐다, 이 양반아. 내가 하면 공정, 남이 하면 불공정. 지랄하고 있네.", ans: ["대기실서 담배 쫌 피우다가 연회장으로 갔는데. 거 말고는 없다.", "회장님은 디너 때 뵙고… 몬 봤던 것 같은데. 정신이 없어가 기억이 잘 안 난다. 아마도 그 이후로는 그분이 그래 되시고… 그기 마지막이다.", "그 근처는 간 적도 없어서 모리겠는데.", "쿵 소리든, 쾅 소리든, 뿅 소리든 내는 들은 적 없다. 연회장이 얼마나 시끄라운데. 그런 소리가 났다캐도 들리겠나.", "낯선 사람… 몬 봤던 것 같은데. 아인가?", "뭐… 마이 피곤해 보이던 것 같은데. 잘 모리겠다. 그분이랑 아는 사이도 아이라서.", "흡연, 뭐… 하는데, 와. 사람이 쫌 피곤하고 그라믄 더 피울 수도 있지. 담배도 몬 피우나.", "뭣이고, 이기 언제 생긴 긴데. 바지 닦을 때만 해도 몬 본 것 같은데…. 아, 괭이 땜에 생깄는갑다. 막 돌아댕기드만. 내도 잘 모리겠다."] },
+    "병구": { job: "백수", img: "https://i.ibb.co/qFBgX90y/IMG-7684.png", profile: "먹을 거 있니?", ans: ["창고에서 몰래 쉬고 있었어요…. 진짜 금방 들어가려고 했어요.", "디너 때 뵙고 못 뵀던 것 같아요.", "어라… 제가 청소할 때만 해도 창문은 열린 적 없는데. 청소 이후로는 그쪽으로 간 적이 없어서 모르겠어요.", "어… 없던 것 같은데…. 아! [이름] 형사님, 제가 창고에서 몰래 쉬고 있을 때 뭐가 쿵! 하는 소리는 들었던 것 같아요. 누가 뭐 떨어트린 줄 알았는데… 그게 회장님이었어요…?", "청소할 때는 다른 회장님들 지나다니시는 건 봤는데, 그 이후로는 간 적이 없어서 모르겠어요.", "어… 제가 회장님을 볼 시간이 없어서…. 일하느라 바빠서 모르겠습니다….", "아, 저는 연회장에서 다 드신 접시 치우는 거 했어요.", "어떤 분이 VIP 대기실이 좀 더럽다고 해서 팀장님께 말씀드렸거든요. 그랬더니 저보고 치우라고 하셔서 디너 중간에 잠깐 청소하러 갔었어요."] },
+    "영진호": { job: "기자", img: "https://i.ibb.co/5X5FTKqx/IMG-2756.png", profile: "어? 연쇄살인마가 제 침대 밑에 숨어 있었네요. 지금 나까지 죽이려고 하는 것 같은데?", ans: ["그냥 좀 돌아다니고 있었어요.", "디너 때 본 게 다예요. 대화는 나눈 저 없고요.", "그 근처를 간 적이 없어서 모르겠네요.", "그 바로 위층이 회장실이잖아요. 회자일 앞에서는 작게 들었습니다. 뭐가 쿵, 하는 소리요.", "그 근처를 간 적이 없어서 모릅니다.", "피로감이 많이 쌓여 보였습니다. 그래서 회장실까지 안 가고 VIP 대기실로 간 것 같고요. 가깝잖아요. 대화하는 걸 들어보면 며칠 잠을 설쳤다고 하던데요.", "아, 이거. 회장실 앞에서요.", "알면서 물어본 거였어요? 예, 아무도 없는 거 보고 문 따려고 했습니다. 쿵 소리가 들리길래 주변을 둘러봤는데 저 멀리서 순찰 중인 경호원들이 날 보더니 달려들었습니다. 제압을 씨발, 어떻게 하는 건지 바닥에 머리 박아서 이렇게 됐네요. & 형사님, 이거 신고 되죠? 과잉 진압 뭐, 이런 걸로."] },
+    "이돈": { job: "37세, 법무법인 ML 변호사 및 가성그룹 가성호 회장 개인변호사", img: "https://i.ibb.co/Gfqz8GD6/IMG-7687.png", profile: "한 입으로 두 말하기엔 내 입이 좀 비싼데. 1분에 1만 원, 1시간에 60만 원 하는 변호사라서.", ans: ["가성호 회장님을 대신해서 인사를 하고 다녔습니다.", "디너가 거의 다 마무리 되어갈 때쯤, 회장님께서 VIP 대기실에 혼자 계신다는 얘기를 듣고 찾아가서 인사를 드렸습니다. 그렇게 대화를 나누다가 많이 피곤하시다고 하셔서 나왔습니다. 그때가 아마도 한… 20시 10분 정도 됐었고요. 그 이후로는 연회장에만 있었습니다.", "이상하네요. 에어컨을 틀어놔서 조금 시원한 정도였지, 창문은 연 적이 없었는데. 제가 나온 이후로 VIP 대기실을 간 적이 없어서 그 이후는 모르겠습니다.", "연회장에 있을 때는 들은 적이 없습니다. 노래도 있고, 사람들 대화 소리도 있었으니까요.", "수상한 사람은 본 적 없습니다. 제가 나올 때는 그 복도에 아무도 없었거든요. 아, 그 근처는 아니긴 한데 남두헌 검사님을 복도에서 마주치긴 했습니다. 그 방향으로 가면 VIP 대기실이랑 화장실이 있는데, 화장실 가신 것 같던데요. 표정을 보니 그리 좋진 않아 보여서요. 다른 곳은 사람이 많아서 VIP 대기실 쪽 화장실 가시는 분도 조금 있는 것 같았습니다.", "안색이 좋지 않아 보여서 여쭤봤습니다. 피로가 좀 쌓여있다고만 하셨지, 다른 말씀은 없으셨습니다.", "회장님께서 덥다시며 땀을 흘리셔서 제가 닦으시라고 손수건을 드렸습니다.", "가성호 회장님과 권 회장님, 두 분의 개인적인 대화라 이 부분에 대해서는 진술을 거부하겠습니다."] },
+    "이성조": { job: "프리랜서", img: "https://i.ibb.co/m5QH6BJv/IMG-2757.png", profile: "성불하쇼.", ans: ["시간까지 봐감서 싸돌아댕기는 사람이 있나. 여기저기 있었는디. 어디 보자…. 비상구서 야경도 좀 보고, 추워서 일반 대기실도 가고, 연회장도 갔다가, 속이 깝깝시란게 나와서 사람 없는 곳으로 걷는디 VIP 대기실까지 간 것이고. 이게 다여.", "대화는 한 적이 없고, 마지막으로 본 것은 이미 죽은 뒤인디? 것도 쳐주나?", "복도에도 찬기가 장난이 아니드만. 그 안에 들어간게 완전히 냉골이었다니까. 건물 안이 아니라 바깥에 있는 느낌일 정도로.", "소리는 하나도 못 들었지. 그 빌딩이 좀 넓나. 나가 쏘머즈도 아니고.", "나가 돌아다닐 적에는 본 적이 없는데.", "죽은 뒤에 보니께 안색이 많이 죽긴 혔더라. 시체맹키로 생겼던데. 농담이여, 농담. 저스트 조크. 이? [성][이름] 형사님은 조크도 모르나. 그 J… 암튼 있어. 검색혀서 봐.", "통제는 무슨, 문이 요로코롬 쪼매나게 열려있드만. 고것이 통제냐?", "그니까. 잘 들어잉. 한 번만 얘기할 거니께. 복도를 지나는디 겁나게 찬기가 드는 거여. 그래갖고 인자 보니까 VIP 대기실 문이 열려있대? 사람 심리라는 것이 보고 싶잖여. 그래갖고 살짝만 보고 말라고 혔지. 근데 그 안에 딱 권 회장이 쓰러져 있네? 그게 다여."] },
+    "정정환": { job: "36세, 송원서 형사과 경사", img: "https://i.ibb.co/CDNx1Qk/IMG-1399.png", profile: "경사! 정! 정! 환!", ans: ["연회장에서 술 마시고 있었을 겁니다.", "디너 때 뵙고 못 뵌 것 같아요. 대화는 못 나눠 봤습니다.", "연회장을 나가지 않아서 모르겠네요.", "연회장에서는 그런 소리 못 들었습니다.", "연회장에만 있어서… 거수자는 못 봤습니다. 제가 술을 마시고 있어서 정확하진 않지만, 특이 행동을 보이는 사람은 없었어요.", "실제로는 처음 뵙는 분이라 잘 모르겠습니다.", "우연히 초대받게 되어서 오게 되었습니다. 이런 자리가 다 연이 되잖아요. 제가 딸만 넷입니다. 사건도 없고, 미리 신청한 연차라 오게 되었습니다. 그런데 이런 사건이 터질 거라고는 생각도 못 했네요. 근데 [성] 형사님, 이거… 인사고과에 들어갑니까?", "아니요. 과음하진 않습니다. 집에 와이프도 있고, 딸들도 있으니 술을 그렇게 마실 시간이 없어서요. 근데 여기 와인들은 다 비싼 거더라고요. 그래서 좀 마셨습니다. 아, 저 술은 영은이, 아니, 제 와이프 주려고 챙긴 거예요. 허락받았습니다."] },
+    "조태주": { job: "강원도 건설교통국장", img: "https://i.ibb.co/PGxZ6KDK/IMG-7683.png", profile: "당신 같은 사람은 처음이에요.", ans: ["연회장에서 밥 먹고, 화장실 간 거 말고는 없어요.", "디너 때 뵙고 못 뵈었던 것 같아요. 인사만 잠깐 했고요.", "화장실에 가려고 했을 때 근처는 사람이 좀 있어서 없는 쪽으로 가다 보니 VIP 대기실이 있는 쪽에 화장실에 갔는데, 마음이 급해서 한기는 못 느끼던 것 같아요. 아, 화장실에서 그… 남두헌 검사님인가? 앞에 먼저 조사하신 분이요. 그분 만났거든요. 바짓단에 뭐가 묻었다면서 닦고 한참을 닦고 계셨으니까, 그분께 물어보시면 알 겁니다.", "저는 못 들었던 것 같아요.", "화장실 갈 때는 없었어요. 사람 자체가 없었어요.", "모르겠어요.", "화장실에 가려고 했을 때 복도에서 종잇조각을 주웠습니다. 그냥 지나치려고 했는데 문서 양식이 뭔가 중요한 문서 같아서 주워서 봤습니다. 근데 모서리만 본다고 해서 내용을 다 알 수가 없잖아요. 이런 사건까지 터졌는데 들고 있다가 괜한 오해를 살까 봐 몰래 버렸던 겁니다.", "종이 모서리만 가지고 내용을 다 알 수가 없잖아요. 그래서 혹시나 다른 조각이 있을까 싶어 좀 살펴봤어요. 근데 없더라고요. 그래서 찾는 거 포기했었습니다."] },
+    "천은호": { job: "총독부 통신과", img: "https://i.ibb.co/k6G71YZW/IMG-7686.png", profile: "하나쨩… 금방 갈게.", ans: ["하나쨩 찾으러 다녔소.", "디너 때만 뵙고 못 뵌 것 같소다만.", "하나쨩을 찾으러 다닐 때 한기가 느껴진 곳은 없었소.", "하나쨩을 찾아서 일반 대기실로 가는 도중에 작게 쿵 소리가 들렸던 것 같소. 우리 하나쨩이 깜짝 놀라는 바람에 달래느라 애를 먹었지.", "하나쨩을 찾으러 다닐 때는 수상한 사람을 본 적이 없었습니다.", "권 회장님과는 개인적인 친분이 없어 잘 모르겠습니다.", "하나쨩을 혼자 두고 오면 불안하니까. 굶진 않을까, 아빠가 보고 싶어서 울고 있진 않을까. 걱정과 많이 되잖소. 그러니 데리고 왔지.", "하나쨩 찾으러 다니고, 일반 대기실에 하나쨩 놓고 오느라 그런 거요."] }
+};
 
-    let infoIdx = 0, sceneIdx = 0, foundSus = [], currentI = 0, currentQ = 0, targetName = "";
+const commonQs = ["사건 당일 오후 8시부터 9시 사이에 어디서 무엇을 하셨습니까?", "피해자와 마지막으로 대화하거나 마주친 적은 언제입니까?", "사건 현장인 VIP 대기실 창문이 완전히 개방되어 있었습니다. 당시 대기실 근처를 지나며 비정상적으로 새어 나오는 찬바람이나 한기를 느끼신 적이 있습니까?", "피해자는 후두부에 강한 타격을 입고 쓰러졌습니다. 대기실 근처에서 무언가 부딪히거나 깨지는 등의 소음을 들으신 적은 없습니까?", "사건 전후로 대기실이 위치한 복도 쪽에서 평소와 다른 낯선 인물을 보거나 위화감을 느낀 적이 있습니까?", "발견 당시 피해자는 이미 사후 강직이나 냉각이 상당히 진행된 상태였습니다. 오늘 행사장 안에서 피해자의 안색이 안 좋다거나 몸 상태가 이상해 보였던 점은 없었습니까?"];
+const personalQs = { "권현조": ["경영권에 관해 피해자와 다툼이 있다고 들었습니다. 사실입니까?", "피해자 병원 진료 기록을 보면 요즘 잦은 빈혈 증세를 보였다고 하는데, 알고 계셨습니까?"], "김무진": ["사건 발생 추정 시각에 비상구 계단에서 누군가와 통화하는 모습이 목격되었습니다. 누구와 어떤 대화를 나누셨습니까?", "피해자가 최근 진행하던 대규모 계약이 무산될 위기였다고 들었습니다. 오늘 그 건으로 기념식에 참석한 겁니까?"], "남두헌": ["일반 대기실에 있던 재떨이에는 한 종류의 담배만 쌓여있었습니다. 평소 자주 많이 흡연하십니까?", "구두에 긁힌 자국이 있는데, 언제 생긴 겁니다?"], "병구": ["아르바이트 당시, 근무 지역이 어디였습니까?", "VIP 대기실에서 당신의 것으로 추정되는 소지품이 발견되었습니다. 언제 들어간 겁니다?"], "영진호": ["상처는 언제 생긴 겁니다?", "회장실 문고리를 따려던 흔적이 있었고, 당신이 회장실 근처를 서성거려서 제압했다는 경호원의 증언이 있었습니다. 회장실에 간 이유는 뭡니까?"], "이돈": ["당신의 것으로 추정되는 손수건이 VIP 대기실에서 발견되었습니다. 이에 대해 진술할 게 있습니까?", "피해자와는 무슨 대화를 나눴습니까?"], "이성조": ["VIP 대기실은 출입을 통제했다고 했는데 어떻게 들어가신 겁니다?", "발견 당시의 상황을 정확하게 진술할 수 있습니까?"], "정정환": ["오늘 연차를 냈다고 들었습니다. 연차까지 내고 기념식에 참석한 이유가 뭡니까?", "평소 자주 과음을 하십니까?"], "조태주": ["종이를 연회장에 버리는 장면이 CCTV에 찍혔습니다. 경위에 대해 설명할 수 있습니까?", "무언가를 잃어버린 사람처럼 바닥만 살피는 모습이 CCTV에 여러 번 포착되었습니다. 뭘 잃어버린 겁니다?"], "천은호": ["고양이를 기념식에 데려온 이유가 뭡니까?", "디너 이후에 잠시 사라졌던데, 어디 간 겁니다?"] };
 
-    function startStory() {
-        document.getElementById('title-screen').classList.add('hidden');
-        document.getElementById('info-screen').classList.remove('hidden');
-        showNextInfo();
-    }
+const scenes = [
+    { name: "VIP 대기실", img: "https://i.ibb.co/WpRtmMT3/B5-CD1-E8-F-7-B3-F-4-D7-D-9093-9-F35652911-BC.png", clues: [{x:64, y:44, t:"권현조"}, {x:68, y:39, t:"병구"}, {x:85, y:79, t:"이성조"}, {x:25, y:62, t:"이돈"}] },
+    { name: "연회장", img: "https://i.ibb.co/KjrY49Jz/A58-F7-D87-8721-4-CFA-87-F2-72-BEBAE9-B94-D.png", clues: [{x:33, y:55, t:"영진호"}, {x:76, y:47, t:"정정환"}, {x:22, y:47, t:"김무진"}, {x:19, y:61, t:"조태주"}] },
+    { name: "일반 대기실", img: "https://i.ibb.co/prz24QCD/IMG-1395.png", clues: [{x:59, y:61, t:"남두헌"}, {x:15, y:78, t:"천은호"}] }
+];
 
-    function showNextInfo() {
-        if(infoIdx < data.info.length) {
-            document.getElementById('info-text').innerText = data.info[infoIdx++];
-        } else {
-            document.getElementById('info-screen').classList.add('hidden');
-            document.getElementById('main-game').classList.remove('hidden');
-            loadScene();
-        }
-    }
+const narration = [
+    "해송그룹 80주년 기념식에 사망사건이 발생했다", "피해자는 해송그룹 회장 권재규", "시신 발견 장소는 VIP 대기실",
+    "검시관의 말에 의하면, 직접 사인으로는 후두부 둔상에 의한 두개골 분쇄 골절 및 외상성 뇌출혈과 뇌좌상", "테이블 모서리에 머리를 부딪힌 것이 주요인이 되었다",
+    "특이 사항으로는 사후 체온이 주변 기온 영향으로 급격히 하락하였다",
+    "두부 손상 직후 외부 환경에 따른 추가 악화 요인이 제거되었다면 생존 가능성이 배제되지 않았으나, 비정삭적인 저온 환경에 노출되어 지혈 및 회복 기전이 차단됨으로써 사망에 이르렀다",
+    "현장 검증에서 나온 정보에 의하면, 바닥을 긁은 흔적이 보였다", "[성][이름], 당신은 형사입니다", "단서를 찾아 용의자를 추려 범인을 찾으십시오"
+];
 
-    function loadScene() {
-        const s = data.scenes[sceneIdx];
-        const img = document.getElementById('scene-img');
-        const layer = document.getElementById('clue-layer');
-        const title = document.getElementById('scene-title');
-        title.innerText = s.name;
-        img.src = s.img;
-        img.onload = () => {
-            const r = img.getBoundingClientRect();
-            layer.style.width = r.width+"px"; layer.style.height = r.height+"px";
-            layer.style.top = img.offsetTop+"px"; layer.style.left = img.offsetLeft+"px";
-            layer.innerHTML = "";
-            s.clues.forEach(c => {
-                const d = document.createElement('div'); d.className = 'clue';
-                d.style.left = (c.x*100)+"%"; d.style.top = (c.y*100)+"%";
-                d.onclick = () => discover(c.t);
-                layer.appendChild(d);
-            });
-        };
-    }
+let last_name = "", first_name = "", narraIdx = 0, curScene = 0, foundSus = new Set(), selectedKiller = "";
+let interList = [], curSusIdx = 0, interRound = 0, isTyping = false, typingTimer;
 
-    function nav(d) { sceneIdx = (sceneIdx + d + data.scenes.length) % data.scenes.length; loadScene(); }
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function repl(t) { return t.replace(/\[성\]/g, last_name).replace(/\[이름\]/g, first_name); }
 
-    function discover(name) {
-        if(!foundSus.includes(name)) {
-            foundSus.push(name);
-            foundSus.sort(); // 가나다순 정렬 적용
-        }
-        const alertBox = document.getElementById('discovery-alert');
-        alertBox.innerText = "새로운 용의자 발견: " + name;
-        alertBox.style.display = "block";
-        setTimeout(() => { alertBox.style.display="none"; showProfile(name); }, 1000);
-    }
+function initGame() {
+    last_name = document.getElementById('ln').value; first_name = document.getElementById('fn').value;
+    if(!last_name || !first_name) return; showScreen('scr-narra'); playNarra();
+}
 
-    function showProfile(name) {
-        const modal = document.getElementById('profile-overlay');
-        document.getElementById('profile-content').innerHTML = `
-            <div class="p-header"><img src="${data.suspects[name].img}" class="p-img-box"></div>
-            <div class="p-body">
-                <strong style="color:var(--gold); font-size:18px;">${name}</strong> (${data.suspects[name].job})<br><br>${data.suspects[name].profile}
-            </div>
-        `;
-        modal.classList.remove('hidden');
-        document.querySelector('.p-body').scrollTop = 0;
-    }
+function playNarra() {
+    if(narraIdx >= narration.length) { showScreen('scr-main'); renderScene(); return; }
+    isTyping = true; const box = document.getElementById('narra-box'); box.innerText = "";
+    const txt = repl(narration[narraIdx++]); let i = 0;
+    typingTimer = setInterval(() => { box.innerText += txt[i++]; if(i >= txt.length) { clearInterval(typingTimer); isTyping = false; } }, 50);
+}
+function skipNarra() { if(isTyping) { clearInterval(typingTimer); document.getElementById('narra-box').innerText = repl(narration[narraIdx-1]); isTyping = false; } else { playNarra(); } }
 
-    function showList() {
-        const modal = document.getElementById('list-overlay');
-        let html = `<div class="p-body"><h2 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0;">용의자 명단</h2>`;
-        if(foundSus.length === 0) {
-            html += `<p style="text-align:center; padding:20px;">아직 발견된 인물이 없습니다.</p>`;
-        } else {
-            foundSus.forEach(n => {
-                html += `<div style="padding:20px 0; border-bottom:1px solid #333; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="showProfile('${n}')">
-                            <span>${n} (${data.suspects[n].job})</span>
-                            <span style="color:var(--gold); font-size:12px;">상세보기 ></span>
-                         </div>`;
-            });
-        }
-        html += `</div>`;
-        document.getElementById('list-content').innerHTML = html;
-        modal.classList.remove('hidden');
-    }
+function renderScene() {
+    const s = scenes[curScene]; document.getElementById('place-name').innerText = s.name;
+    document.getElementById('main-bg').style.backgroundImage = `url(${s.img})`;
+    const layer = document.getElementById('hit-layer'); layer.innerHTML = "";
+    s.clues.forEach(c => {
+        const b = document.createElement('button'); b.className = 'clue-hit'; b.style.left = c.x+"%"; b.style.top = c.y+"%";
+        b.onclick = () => { foundSus.add(c.t); openProfile(c.t); }; layer.appendChild(b);
+    });
+}
+function changeScene(d) { curScene = (curScene + d + 3) % 3; renderScene(); }
 
-    function closeList() { document.getElementById('list-overlay').classList.add('hidden'); }
-    function closeProfile() { document.getElementById('profile-overlay').classList.add('hidden'); }
+function openProfile(n) {
+    const s = suspects[n]; document.getElementById('p-img').src = s.img;
+    document.getElementById('p-name').innerText = n; document.getElementById('p-job').innerText = s.job;
+    document.getElementById('p-desc').innerText = repl(s.profile);
+    document.getElementById('modal-profile').style.display = 'flex';
+}
 
-    function startInter() {
-        if(foundSus.length === 0) { alert("발견한 용의자가 없습니다."); return; }
-        document.getElementById('main-game').classList.add('hidden');
-        document.getElementById('inter-screen').classList.remove('hidden');
-        currentI = 0; loadInter();
-    }
+function openSusList() {
+    const list = document.getElementById('list-items'); list.innerHTML = "";
+    Array.from(foundSus).sort().forEach(n => {
+        const d = document.createElement('div'); d.style.padding = "15px"; d.style.borderBottom = "1px solid #222";
+        d.innerHTML = `<strong>${n}</strong> <span style="font-size:11px; color:#888; margin-left:10px;">${suspects[n].job}</span>`;
+        d.onclick = () => openProfile(n); list.appendChild(d);
+    });
+    document.getElementById('modal-list').style.display = 'flex';
+}
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    function loadInter() {
-        const name = foundSus[currentI], d = data.suspects[name]; currentQ = 0;
-        document.getElementById('i-img').src = d.img;
-        document.getElementById('i-name').innerText = name;
-        document.getElementById('i-res').innerText = "질문을 선택하십시오.";
-        renderQs();
-    }
-
-    function renderQs() {
-        const name = foundSus[currentI], sets = data.suspects[name].questions, box = document.getElementById('i-btns');
-        box.innerHTML = "";
-        if(currentQ < sets.length) {
-            const s = sets[currentQ];
-            [s.q1, s.q2].forEach((q, idx) => {
-                if(!q) return;
-                const btn = document.createElement('button'); btn.className='query-btn'; btn.innerText = q;
-                btn.onclick = () => {
-                    document.getElementById('i-res').innerText = (idx === 0 ? s.a1 : s.a2);
-                    document.getElementById('i-res').scrollTop = 0;
-                    box.innerHTML = `<button class="next-btn" onclick="currentQ++; renderQs();">다음 단계</button>`;
-                };
-                box.appendChild(btn);
-            });
-        } else {
-            const isLast = (currentI === foundSus.length - 1);
-            const btn = document.createElement('button'); btn.className='next-btn';
-            btn.innerText = isLast ? "사건 종결 및 체포하기" : "다음 용의자 심문하기";
-            btn.onclick = isLast ? showArrest : () => { currentI++; loadInter(); };
-            box.appendChild(btn);
-        }
-    }
-
-    function showArrest() {
-        document.getElementById('inter-screen').classList.add('hidden');
-        document.getElementById('arrest-screen').classList.remove('hidden');
-        const grid = document.getElementById('arrest-grid'); grid.innerHTML = "";
-        // 이미 가나다순으로 정렬된 foundSus를 사용하여 목록 생성
-        foundSus.forEach(n => {
-            const d = document.createElement('div'); d.className = 'arrest-card';
-            d.innerHTML = `<img src="${data.suspects[n].img}" style="width:100%; height:120px; object-fit:contain;"><p>${n}</p>`;
-            d.onclick = () => { targetName = n; document.getElementById('arrest-screen').classList.add('hidden'); document.getElementById('reason-screen').classList.remove('hidden'); };
-            grid.appendChild(d);
-        });
-    }
-
-    function judge() {
-        const reason = document.getElementById('reason-input').value;
-        const keys = ["다툼","우발","흉기","안경","회피","모호","계약서"];
-        let score = 0;
-        keys.forEach(k => { if(reason.includes(k)) score++; });
-        if(["알리바이","단독","시각","혼자"].some(k => reason.includes(k))) score++;
-        if(reason.includes("과실치사")) score += 2;
-        score = Math.min(score, 5);
-
-        const endScreen = document.getElementById('ending-screen');
-        const body = document.getElementById('end-body');
-        const content = document.getElementById('ending-content');
-
-        document.getElementById('reason-screen').classList.add('hidden');
-        endScreen.classList.remove('hidden');
-
-        if(targetName === "남두헌") {
-            const msgs = [
-                "증거 불충분으로 인한 기소 기각.", 
-                "기소유예.", 
-                "벌금 2천만 원.", 
-                "금고 1년, 집행유예 2년.", 
-                "금고 3년.", 
-                "금고 5년. 사건 현장에 흩어진 파편들이 가리키는 진실을 정확히 꿰뚫었습니다. 권력을 이용해 현장을 은폐하려던 시도는 당신의 끈질긴 수사 앞에 무릎을 꿇었습니다. 이것은 정의의 승리입니다."
-            ];
-            body.innerText = msgs[score];
-            content.style.top = "-50px"; 
-
-            // 성공 이미지 배경 설정
-            if(score <= 1) {
-                endScreen.style.backgroundImage = "url('https://i.ibb.co/bjKHDxgF/IMG-1384.jpg')"; // 저득점
-            } else {
-                endScreen.style.backgroundImage = "url('https://i.ibb.co/F4xShV8r/IMG-1384.jpg')"; // 고득점
+function openInter() {
+    interList = Array.from(foundSus).sort(); if(interList.length === 0) return alert("용의자를 찾으세요.");
+    curSusIdx = 0; showScreen('scr-inter'); renderInter();
+}
+function renderInter() {
+    const n = interList[curSusIdx]; interRound = 0;
+    document.getElementById('inter-name').innerText = n; document.getElementById('inter-img').src = suspects[n].img;
+    document.getElementById('inter-ans').innerText = ""; document.getElementById('inter-q-top').innerText = "";
+    showQs();
+}
+function showQs() {
+    const n = interList[curSusIdx]; const box = document.getElementById('inter-q-btns'); box.innerHTML = "";
+    const allQs = [...commonQs, ...personalQs[n]];
+    [allQs[interRound*2], allQs[interRound*2+1]].forEach((q, i) => {
+        if(!q) return;
+        const b = document.createElement('button'); b.className = 'q-btn-item'; b.innerText = q;
+        b.onclick = () => {
+            box.innerHTML = ""; document.getElementById('inter-q-top').innerText = "Q. " + q;
+            document.getElementById('inter-ans').innerText = repl(suspects[n].ans[interRound*2+i]);
+            const nextB = document.createElement('button'); nextB.className = 'btn-gold'; nextB.style.width = "100%";
+            if(interRound < 3) { nextB.innerText = "다음 질문하기"; nextB.onclick = () => { interRound++; showQs(); }; }
+            else {
+                if(curSusIdx < interList.length - 1) { nextB.innerText = "다음 용의자 심문하기"; nextB.onclick = () => { curSusIdx++; renderInter(); }; }
+                else { nextB.innerText = "체포하기"; nextB.onclick = () => { buildArrestList(); showScreen('scr-report'); }; }
             }
+            box.appendChild(nextB);
+        };
+        box.appendChild(b);
+    });
+}
+
+function buildArrestList() {
+    const grid = document.getElementById('sus-select-grid'); grid.innerHTML = "";
+    Array.from(foundSus).sort().forEach(n => {
+        const card = document.createElement('div'); card.className = "sus-card";
+        card.innerHTML = `<img src="${suspects[n].img}"><span>${n}</span>`;
+        card.onclick = () => { document.querySelectorAll('.sus-card').forEach(c => c.classList.remove('selected')); card.classList.add('selected'); selectedKiller = n; };
+        grid.appendChild(card);
+    });
+}
+
+function judge() {
+    if(!selectedKiller) return alert("범인을 선택하십시오.");
+    const title = document.getElementById('rep-title').value;
+    const body = document.getElementById('rep-body').value;
+    let score = 0;
+    const isCorrect = (selectedKiller === "남두헌");
+
+    const validTitles = ["과실치사", "폭행치사", "유기치사", "살인", "형법 제267조", "형법 제262조", "형법 제275조", "형법 제250조"];
+    const hasValidTitle = validTitles.some(v => title.includes(v));
+
+    if(hasValidTitle) {
+        if(body.includes("생존 가능성") || body.includes("방치")) score++;
+        if(body.includes("창문") || body.includes("저온 노출") || body.includes("저체온") || body.includes("냉기 유발") || body.includes("피해자 생존 가능성 차단")) score++;
+        if(body.includes("허위 진술") || body.includes("거짓 증언") || body.includes("동선 은폐") || body.includes("증언 모순") || body.includes("접근 사실 부인")) score++;
+        if(body.includes("구두") || body.includes("바짓단")) score++;
+        if(body.includes("호칭") || body.includes("심리적 거리두기")) score++;
+        if(body.includes("부작위에 의한 살인")) score += 2;
+        if(score > 5) score = 5;
+    } else {
+        score = 0;
+    }
+
+    let bg = "", msg = "";
+    const msgBox = document.getElementById('end-msg-box');
+    msgBox.classList.remove('top', 'center'); // 초기화
+
+    if(!isCorrect) {
+        bg = "https://i.ibb.co/4Zw3TYk6/IMG-1384.jpg";
+        msgBox.classList.add('center'); // 틀렸을 땐 중앙
+        const fails = {
+            "권현조": "유가족을 범으로 지목한 것은 경찰로서 최악의 선택이었습니다. 슬픔에 잠긴 유족을 가해자로 몰아세운 당신의 수사 결과에 여론은 들끓었고, 당신은 인륜을 저버린 수사관으로 낙인찍혔습니다. 유족의 상처는 영원히 씻기지 않을 것입니다.",
+            "김무진": "그가 들고 있던 것은 흉기가 아니라 현장을 기록하던 캠코더였습니다. 소중한 취재 장비를 뺏긴 피해자를 가해자로 만든 잘못된 수사입니다. 경찰이 진실을 입막음했다는 비난 속에 수사팀은 해체되었고, 진실은 영원히 묻혔습니다.",
+            "병구": "단지 머리빗을 떨어뜨렸다는 이유로 현장에서 열심히 일하던 청년을 살인자로 몰았습니다. 힘없는 시민에게 책임을 전가한 당신의 수사 기록은 경찰 역사상 최악의 수치로 남을 것입니다. 당신의 잘못된 수사가 한 청년의 인생을 송두리째 꺾어놓았습니다.",
+            "영진호": "현장에서 묵묵히 자리를 지키던 인물을 지목한 당신의 수사는 억측에 불과했습니다. 그는 사건과 무관한 증언자였으나, 당신의 무리한 수사로 인해 평범한 삶이 파괴되었습니다. 경찰의 공신력은 바닥으로 추락했습니다.",
+            "이돈": "그의 동선이 수상하다는 심증만으로 변호사를 기소한 대가는 가혹했습니다. 그는 자신의 결백을 완벽히 입증했고, 당신은 무리한 수사에 대해 책임지고 경찰 제복을 벗어야 했습니다. 무고한 사람을 가둔 대가는 뼈아픈 징계와 불명예였습니다.",
+            "이성조": "최초 발견자라는 이유로 피해자와의 연결성을 만들며 그의 배경에만 매몰된 수사였습니다. 현장의 실질적인 증거물들을 외면한 채 특정 인물을 표적으로 삼은 당신의 집착이 결국 죄 없는 사람을 범죄자로 만들고 말았습니다.",
+            "정정환": "그는 한 가정의 가장으로, 슬하에 자녀를 넷이나 둔 아버지며 형사였습니다. 당신의 그릇된 판단에 의하여 한 가정이 파탄 나며, 가족이 다 흩어지게 되었습니다. 이를 알게 된 여론은 들끓었고, 당신은 가정을 파괴한 수사관으로 낙인찍혔습니다. 술에 취한 사람을 범인으로 몰기는 쉬웠을 겁니다. 하지만 그는 그저 연회장의 손님이었을 뿐입니다. 명확한 증거 없이 취객을 범인으로 확신한 당신의 수사는 논리보다 편견이 앞선 잘못된 수사였습니다.",
+            "조태주": "그가 버린 종잇조각은 그저 현장에서 느낀 공포의 파편이었을 뿐입니다. 겁에 질린 목격자를 범인으로 몰아세운 당신의 수사는 사건의 본질을 완전히 빗나갔습니다. 당신은 진정한 정의를 실현하는 데 실패했습니다.",
+            "천은호": "알리바이가 확실한 인물을 범인으로 지목하기 위해 당신은 억지 논리를 펼쳤습니다. 무리한 꿰맞추기식 수사로 인해 죄 없는 시민이 고통받았고, 당신의 경찰 경력은 이 잘못된 수사와 함께 마침표를 찍게 되었습니다."
+        };
+        msg = fails[selectedKiller] || "수사 실패.";
+    } else {
+        bg = (score <= 1) ? "https://i.ibb.co/bjKHDxgF/IMG-1384.jpg" : "https://i.ibb.co/F4xShV8r/IMG-1384.jpg";
+        msgBox.classList.add('top'); // 남두헌 성공 시 상단 배치
+
+        if(title.includes("살인") && score === 5 && body.includes("꿀단지")) {
+            msg = "무기징역\n\n사건 현장에 흩어진 파편들을 찾아 파편이 가리키는 진실에 다가갔습니다.\n이것은 " + repl("[성][이름]") + " 형사가 기록한 정의의 승리입니다.";
+            document.getElementById('scr-end').onclick = () => {
+                const em = document.getElementById('end-msg');
+                em.classList.add('report-text');
+                em.innerText = `[범행 상세 보고서]\n\n1. 배경 (디너 종료 직후~20:10)\n기념식 디너 행사가 끝나고, 권 회장은 피로를 느껴 홀로 VIP 대기실로 향한다. 그는 경호원들에게 "잠시 혼자 있고 싶으니, 누구도 들이지 마라"고 명령한다. 하지만 남두헌은 권 회장의 '비밀 자료'를 해결하기 위해 마지막 협상을 시도하러 대기실로 들어간다.\n\n2. 사고 발생 (20:15~20:18)\n• 상황: 남두헌이 무릎을 꿇고 애원했으나, 권 회장은 가차 없이 그를 비난하며 검찰 총장에게 보낼 서류를 챙겨 일어난다.\n• 사고: 일어서던 권 회장이 갑작스러운 혈압 상승과 어지럼증으로 비틀거린다. 남두헌이 본능적으로 팔을 뻗어 그를 붙잡으려 했으나, 권 회장이 그의 손을 거칠게 뿌리치다 무게 중심을 잃고 뒤로 넘어진다.\n• 충격: 권 회장의 후두부가 날카로운 대리석 테이블 모서리에 '퍽' 소리와 함께 강타당한다. 권 회장은 즉시 의식을 잃고 바닥에 고꾸라진다.\n\n3. 살인으로의 전환 (20:18~20:25)\n• 확인: 남두헌은 떨리는 손으로 회장의 맥박을 짚는다. 아직 살아있어 119를 부르면 확실히 살 수 있는 상태다.\n• 결정: 남두헌의 눈에 회장의 품에서 떨어진 '남두헌-약팔이 유착 장부'가 들어온다. 그는 잠시 멈칫하다 휴대폰을 내려놓는다.\n• 증거 생성: 권 회장이 마지막 힘을 다해 자료를 붙잡았으나, 힘으로 뺏는 과정에서 종이가 찢어져 버린다. 그래도 권 회장은 끝까지 남두헌의 다리를 잡으려 하였으나, 남두헌이 힘으로 다리를 빼는 과정에서 구두에 손톱자국을 남기게 된다.\n• 집행: 장부와 USB를 챙긴 채 창문을 전부 개방해 영하의 강력한 칼바람이 들이치게 하여, 뇌 손상을 입은 권 회장이 저체온 쇼크와 과다 출혈로 죽음에 이르게 한다.\n\n4. 범행 직후 (20:25~20:28)\n남두헌은 회장의 숨이 잦아드는 것을 확인하고, 자신의 파멸이 담긴 장부와 USB를 챙겨 품에 넣는다. 그는 매우 침착하게 세면대에서 바짓단에 혈흔을 닦아내고 거울을 보며 매무새를 가다듬는다.\n\n6. 이성조의 개입 (21:00)\n디너 후 복도를 지나던 이성조는 VIP 대기실 문이 미세하게 열려 있는 것을 발견한다. 그 사이로 쓰러져 있는 권 회장을 발견해 VIP 대기실로 몰래 들어간다. 권 회장의 귀중품을 훔치려 하였으나, 몸에 지닌 게 없어 포기한 채 의심받기 싫어 어쩔 수 없이 경찰에 직접 신고를 하게 된다.`;
+                document.getElementById('scr-end').onclick = null; // 중복 클릭 방지
+            };
         } else {
-            // 판결 실패 배경 설정 (범인이 틀렸을 경우)
-            endScreen.style.backgroundImage = "url('https://i.ibb.co/4Zw3TYk6/IMG-1384.jpg')";
-            body.innerText = data.suspects[targetName].ending;
-            body.style.textAlign = "center";
-            content.style.top = "0";
+            const table = {
+                "과실치사": ["기소 기각","집행유예","벌금 300","벌금 700","금고 1년","금고 2년"],
+                "폭행치사": ["기소 기각","집행유예","징역 3년","징역 4년","징역 5년","징역 6년"],
+                "유기치사": ["기소 기각","집행유예","징역 3년","징역 4년","징역 5년","징역 7년"],
+                "살인": ["기소 기각","집행유예","징역 5년","징역 6년","징역 7년","징역 8년"]
+            };
+            const type = Object.keys(table).find(k => title.includes(k)) || "살인";
+            msg = table[type][score] || "판결 완료";
         }
     }
+
+    showScreen('scr-end');
+    document.getElementById('end-bg').style.backgroundImage = `url(${bg})`;
+    document.getElementById('end-msg').innerText = msg;
+}
 </script>
 </body>
 </html>
