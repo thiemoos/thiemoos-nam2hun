@@ -39,23 +39,21 @@
         .modal-content { width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; color: white; }
         .prof-img { width: 180px; height: 220px; object-fit: cover; border: 1px solid #333; margin-bottom: 15px; }
 
-        .sus-select-grid { display: flex; overflow-x: auto; gap: 10px; width: 100%; padding: 10px 0; margin-bottom: 10px; }
+        .sus-select-grid { display: flex; overflow-x: auto; gap: 10px; width: 100%; padding: 10px 0; min-height: 120px; }
         .sus-card { flex: 0 0 80px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; }
         .sus-card.selected { opacity: 1; transform: scale(1.1); }
         .sus-card img { width: 60px; height: 75px; object-fit: cover; border: 1px solid #444; }
-        .sus-card.selected img { border-color: var(--gold); }
-        .sus-card span { font-size: 11px; }
+        .sus-card span { font-size: 11px; white-space: nowrap; }
 
-        #scr-report { padding-top: 20px; }
-        .report-scroll-area { width: 90%; height: 50%; overflow-y: auto; border: 1px solid var(--gold); padding: 15px; box-sizing: border-box; background: #161616; display: flex; flex-direction: column; gap: 10px; }
-        .report-bottom-space { width: 90%; height: 40%; position: relative; display: flex; align-items: center; justify-content: center; }
+        #scr-report { padding: 20px 0; align-items: center; justify-content: flex-start; }
+        .report-full-area { width: 90%; height: 90%; display: flex; flex-direction: column; gap: 10px; }
 
         #scr-end { background: black; }
         .end-bg { width: 100%; height: 100%; background-size: cover; background-position: center; position: absolute; }
         #end-container { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 30; }
-        .end-box { position: relative; width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 25px; box-sizing: border-box; min-height: 160px; text-align: center; }
-        .end-box.top-pos { position: absolute; top: 10%; }
-        .retry-btn { position: absolute; bottom: 12px; right: 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 4px 10px; font-size: 11px; cursor: pointer; }
+        .end-box { position: relative; width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; text-align: center; }
+        .end-box.honey-mode { position: absolute; top: 5%; height: 40%; overflow-y: auto; text-align: left; }
+        .retry-btn { position: absolute; bottom: 12px; right: 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 4px 10px; font-size: 11px; cursor: pointer; z-index: 40; }
     </style>
 </head>
 <body>
@@ -111,23 +109,22 @@
     </div>
 
     <div id="scr-report" class="screen">
-        <h3 style="color: var(--gold); margin-bottom: 5px;">혐의 판단 보고서</h3>
-        <div class="report-scroll-area">
+        <div class="report-full-area">
+            <h3 style="color: var(--gold); margin: 0;">혐의 판단 보고서</h3>
             <p style="font-size: 11px; color: #888; margin: 0;">범인을 지목하십시오</p>
             <div id="sus-select-grid" class="sus-select-grid"></div>
-            <input type="text" id="rep-title" placeholder="죄목을 적으십시오" style="width: 100%; margin-bottom: 8px; background: #222; border: 1px solid var(--gold); color: white; padding: 10px; box-sizing: border-box;">
-            <textarea id="rep-body" style="width: 100%; height: 150px; background: #222; border: 1px solid var(--gold); color: white; padding: 10px; box-sizing: border-box;" placeholder="상세 혐의를 적으십시오"></textarea>
-            <button class="btn-gold" style="width: 100%;" onclick="judge()">판결 요청</button>
+            <input type="text" id="rep-title" placeholder="죄목을 적으십시오" style="width: 100%; background: #222; border: 1px solid var(--gold); color: white; padding: 12px; box-sizing: border-box;">
+            <textarea id="rep-body" style="width: 100%; flex-grow: 1; background: #222; border: 1px solid var(--gold); color: white; padding: 12px; box-sizing: border-box;" placeholder="상세 혐의를 적으십시오"></textarea>
+            <button class="btn-gold" style="width: 100%; height: 50px; margin-top: 5px;" onclick="judge()">판결 요청</button>
         </div>
-        <div class="report-bottom-space" id="easter-egg-area"></div>
     </div>
 
     <div id="scr-end" class="screen">
         <div id="end-bg" class="end-bg"></div>
         <div id="end-container">
             <div id="end-msg-box" class="end-box">
-                <div id="end-msg" style="white-space: pre-wrap; margin-bottom: 20px;"></div>
-                <button class="retry-btn" onclick="retryGame()">다시 기록하기 ➔</button>
+                <div id="end-msg" style="white-space: pre-wrap;"></div>
+                <button id="retry-btn" class="retry-btn" onclick="retryGame()">다시 기록하기 ➔</button>
             </div>
         </div>
     </div>
@@ -191,10 +188,9 @@ function initGame() {
 }
 
 function retryGame() {
-    curScene = 0;
-    foundSus.clear();
-    renderScene();
-    showScreen('scr-main');
+    curScene = 0; foundSus.clear(); selectedKiller = "";
+    document.getElementById('rep-title').value = ""; document.getElementById('rep-body').value = "";
+    renderScene(); showScreen('scr-main');
 }
 
 function playNarra() {
@@ -307,7 +303,10 @@ function judge() {
 
     let bg = "", msg = "";
     const msgBox = document.getElementById('end-msg-box');
-    msgBox.classList.remove('top-pos');
+    const retryBtn = document.getElementById('retry-btn');
+    
+    msgBox.classList.remove('honey-mode');
+    retryBtn.style.display = "block"; 
 
     if(!isCorrect) {
         bg = "https://i.ibb.co/4Zw3TYk6/IMG-1384.jpg";
