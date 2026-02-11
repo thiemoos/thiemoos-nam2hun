@@ -23,16 +23,16 @@
         #rep-title { width: 100%; background: #222; border: 1px solid var(--gold); color: white; padding: 12px; box-sizing: border-box; font-size: 15px; }
         #rep-body { width: 100%; flex-grow: 1; background: #222; border: 1px solid var(--gold); color: white; padding: 12px; box-sizing: border-box; font-size: 14px; line-height: 1.5; resize: none; }
 
-        /* 엔딩 박스 설정 */
-        #scr-end { background: black; }
-        .end-bg { width: 100%; height: 100%; background-size: cover; background-position: center; position: absolute; }
+        /* 엔딩 배경: 잘리지 않고 딱 맞게 (contain) */
+        #scr-end { background: black; overflow: hidden; }
+        .end-bg { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; top: 0; left: 0; }
         #end-container { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 30; pointer-events: none; }
-        .end-box { position: relative; width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; text-align: center; pointer-events: auto; }
         
+        .end-box { position: relative; width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; text-align: center; pointer-events: auto; }
         .end-box.top-mode { position: absolute; top: 5%; transform: none; }
         .end-box.scroll-mode { height: 40%; overflow-y: auto; text-align: left; }
 
-        .retry-btn { position: absolute; bottom: 15px; right: 15px; background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 16px; font-size: 13px; cursor: pointer; display: none; z-index: 50; pointer-events: auto; }
+        .retry-btn { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; font-size: 14px; cursor: pointer; display: none; z-index: 100; pointer-events: auto; }
         .btn-gold { background: rgba(0,0,0,0.8); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; }
 
         #narra-box { width: 85%; text-align: center; line-height: 2; margin-top: 40%; font-size: 16px; white-space: pre-wrap; word-break: keep-all; }
@@ -58,7 +58,7 @@
         <button class="btn-gold" style="width: 100px; height: 40px;" onclick="initGame()">➔</button>
     </div>
 
-    <div id="scr-narra" class="screen" onclick="nextNarra()">
+    <div id="scr-narra" class="screen" onclick="handleNarraClick()">
         <div id="narra-box"></div>
     </div>
 
@@ -111,7 +111,7 @@
                 <div id="end-msg" style="white-space: pre-wrap; line-height:1.6;"></div>
             </div>
         </div>
-        <button id="retry-btn" class="retry-btn" onclick="retryGame()">다시 기록하기 ➔</button>
+        <button id="retry-btn" class="retry-btn" onclick="retryGame()">다시하기 ➔</button>
     </div>
 
     <div id="modal-list" class="modal" onclick="closeModal('modal-list')">
@@ -162,7 +162,8 @@ const narration = [
 ];
 
 let last_name = "", first_name = "", narraIdx = 0, curScene = 0, foundSus = new Set(), selectedKiller = "";
-let interList = [], curSusIdx = 0, interRound = 0, isTyping = false;
+let interList = [], curSusIdx = 0, interRound = 0;
+let isTyping = false, typingTimer = null, currentFullText = "";
 
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function repl(t) { return t.replace(/\[성\]/g, last_name).replace(/\[이름\]/g, first_name); }
@@ -173,17 +174,29 @@ function initGame() {
 }
 
 function typeWriter(text, elementId, speed = 50) {
-    let i = 0; isTyping = true;
+    let i = 0; isTyping = true; currentFullText = text;
     const el = document.getElementById(elementId); el.innerText = "";
+    
     function type() {
-        if (i < text.length) { el.innerText += text.charAt(i); i++; setTimeout(type, speed); }
-        else { isTyping = false; }
+        if (i < text.length) { 
+            el.innerText += text.charAt(i); i++; 
+            typingTimer = setTimeout(type, speed); 
+        } else { isTyping = false; }
     }
     type();
 }
 
+function handleNarraClick() {
+    if (isTyping) {
+        clearTimeout(typingTimer);
+        document.getElementById('narra-box').innerText = currentFullText;
+        isTyping = false;
+    } else {
+        nextNarra();
+    }
+}
+
 function nextNarra() {
-    if(isTyping) return;
     if(narraIdx >= narration.length) { showScreen('scr-main'); renderScene(); return; }
     typeWriter(repl(narration[narraIdx++]), "narra-box");
 }
@@ -259,12 +272,10 @@ function buildArrestList() {
 }
 
 function retryGame() {
-    // 모든 변수 초기화
     narraIdx = 0; curScene = 0; foundSus.clear(); selectedKiller = ""; interRound = 0;
     document.getElementById('rep-title').value = ""; document.getElementById('rep-body').value = "";
     document.getElementById('end-msg-box').classList.remove('top-mode', 'scroll-mode');
     document.getElementById('retry-btn').style.display = "none";
-    // 시작 화면으로
     showScreen('scr-start');
 }
 
@@ -294,7 +305,6 @@ function judge() {
     
     box.classList.remove('top-mode', 'scroll-mode');
     retryBtn.style.display = "none";
-    endScr.onclick = null;
 
     let bg = "", msg = "";
     if(!isCorrect) {
