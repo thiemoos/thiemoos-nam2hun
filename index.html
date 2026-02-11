@@ -11,46 +11,45 @@
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; position: absolute; }
         .active { display: flex; }
 
-        /* 오프닝 타자기 */
         #narra-box { width: 85%; text-align: center; line-height: 2; margin-top: 40%; font-size: 16px; white-space: pre-wrap; word-break: keep-all; }
 
-        /* 탐색 UI */
-        .scene-bg { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; }
-        .clue-hit { position: absolute; background: transparent; border: none; cursor: pointer; z-index: 10; width: 70px; height: 70px; }
+        #scr-main { background: #000; }
+        #main-bg { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .img-wrapper { position: relative; display: flex; align-items: center; justify-content: center; max-width: 100%; max-height: 80vh; }
+        #bg-img { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; object-fit: contain; }
+        #hit-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
+        .clue-hit { position: absolute; background: rgba(255, 0, 0, 0); border: none; cursor: pointer; z-index: 10; width: 60px; height: 60px; transform: translate(-50%, -50%); pointer-events: auto; }
+        
         .nav-header { position: absolute; top: 30px; display: flex; align-items: center; gap: 40px; z-index: 20; color: var(--gold); }
         .bottom-nav { position: absolute; bottom: 30px; display: flex; gap: 10px; z-index: 20; width: 90%; justify-content: center; }
         .btn-gold { width: 45%; height: 45px; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; }
 
-        /* 모달 및 엔딩 박스 공통 디자인 */
-        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: none; justify-content: center; align-items: center; }
-        .modal-content, .end-box { width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; color: white; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #scr-inter { background: black; display: none; flex-direction: column; }
+        #scr-inter.active { display: flex; }
+        .inter-upper { height: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        .inter-img-fixed { height: 75%; width: auto; object-fit: cover; border: 1px solid #333; }
+        .inter-lower { height: 67%; width: 100%; display: flex; flex-direction: column; background: #161616; }
+        .inter-ans-box { height: 50%; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; border-bottom: 1px solid #333; overflow: hidden; }
+        .q-display { color: var(--gold); font-size: 12px; margin-bottom: 5px; flex-shrink: 0; }
+        .ans-display { font-size: 15px; line-height: 1.6; overflow-y: auto; flex-grow: 1; }
+        .inter-q-btns-box { height: 50%; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+        .q-btn-item { background: rgba(197, 160, 89, 0.1); border: 1px solid var(--gold); color: white; padding: 12px; text-align: left; font-size: 13px; cursor: pointer; width: 100%; flex-shrink: 0; }
 
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: none; justify-content: center; align-items: center; }
+        .modal-content { width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; color: white; }
         .prof-img { width: 180px; height: 220px; object-fit: cover; border: 1px solid #333; margin-bottom: 15px; }
 
-        /* 심문 UI */
-        .inter-upper { height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; flex-shrink: 0; }
-        .inter-img-fixed { width: 200px; height: 250px; object-fit: cover; border: 1px solid #333; }
-        .inter-lower { flex-grow: 1; width: 100%; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; background: #161616; }
-        .q-display { color: var(--gold); font-size: 11px; height: 35px; margin-bottom: 5px; overflow: hidden; }
-        .ans-display { font-size: 14px; height: 120px; overflow-y: auto; margin-bottom: 15px; line-height: 1.6; border-bottom: 1px solid #333; }
-        .q-area { display: flex; flex-direction: column; gap: 8px; height: 110px; }
-        .q-btn-item { background: rgba(197, 160, 89, 0.1); border: 1px solid var(--gold); color: white; padding: 12px; text-align: left; font-size: 13px; cursor: pointer; width: 100%; }
-
-        /* 체포 인물 선택 */
         .sus-select-grid { display: flex; overflow-x: auto; gap: 10px; width: 95%; padding: 10px 0; margin-bottom: 10px; }
-        .sus-card { flex: 0 0 80px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; transition: 0.3s; }
+        .sus-card { flex: 0 0 80px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; }
         .sus-card.selected { opacity: 1; transform: scale(1.1); }
         .sus-card img { width: 60px; height: 75px; object-fit: cover; border: 1px solid #444; }
         .sus-card.selected img { border-color: var(--gold); }
         .sus-card span { font-size: 11px; }
 
-        /* 엔딩 화면 전용 스타일 */
+        #scr-end { background: black; }
         .end-bg { width: 100%; height: 100%; background-size: cover; background-position: center; position: absolute; }
         #end-container { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 30; }
-        .end-box { max-height: 80%; overflow-y: auto; text-align: center; line-height: 1.6; }
-        .end-box.top { align-self: flex-start; margin-top: 50px; } /* 남두헌 전용 위치 */
-        .end-box.center { align-self: center; } /* 일반 용의자 위치 */
-        .report-text { text-align: left; font-size: 14px; width: 100%; white-space: pre-wrap; word-break: keep-all; }
+        .end-box { width: 85%; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold); padding: 20px; text-align: center; }
     </style>
 </head>
 <body>
@@ -69,27 +68,39 @@
         <button class="btn-gold" style="width: 100px;" onclick="initGame()">➔</button>
     </div>
 
-    <div id="scr-narra" class="screen" onclick="skipNarra()"><div id="narra-box"></div></div>
+    <div id="scr-narra" class="screen" onclick="skipNarra()">
+        <div id="narra-box"></div>
+    </div>
 
     <div id="scr-main" class="screen">
-        <div id="main-bg" class="scene-bg"></div>
-        <div class="nav-header"><span onclick="changeScene(-1)">◀</span> <span id="place-name"></span> <span onclick="changeScene(1)">▶</span></div>
-        <div id="hit-layer" style="width:100%; height:100%; position:absolute;"></div>
+        <div id="main-bg">
+            <div class="img-wrapper" id="img-wrapper">
+                <img id="bg-img" src="">
+                <div id="hit-layer"></div>
+            </div>
+        </div>
+        <div class="nav-header">
+            <span onclick="changeScene(-1)">◀</span>
+            <span id="place-name"></span>
+            <span onclick="changeScene(1)">▶</span>
+        </div>
         <div class="bottom-nav">
             <button class="btn-gold" onclick="openSusList()">용의자 명단</button>
             <button class="btn-gold" onclick="openInter()">용의자 심문</button>
         </div>
     </div>
 
-    <div id="scr-inter" class="screen" style="background: black;">
+    <div id="scr-inter" class="screen">
         <div class="inter-upper">
             <h3 id="inter-name" style="color: var(--gold); margin: 5px 0;"></h3>
             <img id="inter-img" class="inter-img-fixed" src="">
         </div>
         <div class="inter-lower">
-            <div id="inter-q-top" class="q-display"></div>
-            <div id="inter-ans" class="ans-display"></div>
-            <div id="inter-q-btns" class="q-area"></div>
+            <div class="inter-ans-box">
+                <div id="inter-q-top" class="q-display"></div>
+                <div id="inter-ans" class="ans-display"></div>
+            </div>
+            <div id="inter-q-btns" class="inter-q-btns-box"></div>
         </div>
     </div>
 
@@ -111,8 +122,20 @@
         </div>
     </div>
 
-    <div id="modal-list" class="modal" onclick="closeModal('modal-list')"><div class="modal-content" onclick="event.stopPropagation()"><h3 style="color: var(--gold); border-bottom: 1px solid var(--gold); width: 100%; text-align: center; padding-bottom: 10px;">용의자 명단</h3><div id="list-items" style="width: 100%; overflow-y: auto; max-height: 400px;"></div></div></div>
-    <div id="modal-profile" class="modal" onclick="closeModal('modal-profile')"><div class="modal-content" onclick="event.stopPropagation()"><img id="p-img" class="prof-img" src=""><h3 id="p-name" style="margin: 5px 0;"></h3><p id="p-job" style="font-size: 11px; color: var(--gold); margin-bottom: 15px;"></p><p id="p-desc" style="font-size: 14px; text-align: center; line-height: 1.6;"></p></div></div>
+    <div id="modal-list" class="modal" onclick="closeModal('modal-list')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="color: var(--gold); border-bottom: 1px solid var(--gold); width: 100%; text-align: center; padding-bottom: 10px;">용의자 명단</h3>
+            <div id="list-items" style="width: 100%; overflow-y: auto; max-height: 400px;"></div>
+        </div>
+    </div>
+    <div id="modal-profile" class="modal" onclick="closeModal('modal-profile')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img id="p-img" class="prof-img" src="">
+            <h3 id="p-name" style="margin: 5px 0;"></h3>
+            <p id="p-job" style="font-size: 11px; color: var(--gold); margin-bottom: 15px;"></p>
+            <p id="p-desc" style="font-size: 14px; text-align: center; line-height: 1.6;"></p>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -133,7 +156,7 @@ const commonQs = ["사건 당일 오후 8시부터 9시 사이에 어디서 무�
 const personalQs = { "권현조": ["경영권에 관해 피해자와 다툼이 있다고 들었습니다. 사실입니까?", "피해자 병원 진료 기록을 보면 요즘 잦은 빈혈 증세를 보였다고 하는데, 알고 계셨습니까?"], "김무진": ["사건 발생 추정 시각에 비상구 계단에서 누군가와 통화하는 모습이 목격되었습니다. 누구와 어떤 대화를 나누셨습니까?", "피해자가 최근 진행하던 대규모 계약이 무산될 위기였다고 들었습니다. 오늘 그 건으로 기념식에 참석한 겁니까?"], "남두헌": ["일반 대기실에 있던 재떨이에는 한 종류의 담배만 쌓여있었습니다. 평소 자주 많이 흡연하십니까?", "구두에 긁힌 자국이 있는데, 언제 생긴 겁니다?"], "병구": ["아르바이트 당시, 근무 지역이 어디였습니까?", "VIP 대기실에서 당신의 것으로 추정되는 소지품이 발견되었습니다. 언제 들어간 겁니다?"], "영진호": ["상처는 언제 생긴 겁니다?", "회장실 문고리를 따려던 흔적이 있었고, 당신이 회장실 근처를 서성거려서 제압했다는 경호원의 증언이 있었습니다. 회장실에 간 이유는 뭡니까?"], "이돈": ["당신의 것으로 추정되는 손수건이 VIP 대기실에서 발견되었습니다. 이에 대해 진술할 게 있습니까?", "피해자와는 무슨 대화를 나눴습니까?"], "이성조": ["VIP 대기실은 출입을 통제했다고 했는데 어떻게 들어가신 겁니다?", "발견 당시의 상황을 정확하게 진술할 수 있습니까?"], "정정환": ["오늘 연차를 냈다고 들었습니다. 연차까지 내고 기념식에 참석한 이유가 뭡니까?", "평소 자주 과음을 하십니까?"], "조태주": ["종이를 연회장에 버리는 장면이 CCTV에 찍혔습니다. 경위에 대해 설명할 수 있습니까?", "무언가를 잃어버린 사람처럼 바닥만 살피는 모습이 CCTV에 여러 번 포착되었습니다. 뭘 잃어버린 겁니다?"], "천은호": ["고양이를 기념식에 데려온 이유가 뭡니까?", "디너 이후에 잠시 사라졌던데, 어디 간 겁니다?"] };
 
 const scenes = [
-    { name: "VIP 대기실", img: "https://i.ibb.co/WpRtmMT3/B5-CD1-E8-F-7-B3-F-4-D7-D-9093-9-F35652911-BC.png", clues: [{x:67, y:47, t:"권현조"}, {x:72, y:41, t:"병구"}, {x:92, y:79, t:"이성조"}, {x:19, y:62, t:"이돈"}] },
+    { name: "VIP 대기실", img: "https://i.ibb.co/WpRtmMT3/B5-CD1-E8-F-7-B3-F-4-D7-D-9093-9-F35652911-BC.png", clues: [{x:67, y:47, t:"권현조"}, {x:72, y:41, t:"병구"}, {x:92, y:70, t:"이성조"}, {x:19, y:62, t:"이돈"}] },
     { name: "연회장", img: "https://i.ibb.co/KjrY49Jz/A58-F7-D87-8721-4-CFA-87-F2-72-BEBAE9-B94-D.png", clues: [{x:31, y:55, t:"영진호"}, {x:82, y:46, t:"정정환"}, {x:16, y:47, t:"김무진"}, {x:13, y:61, t:"조태주"}] },
     { name: "일반 대기실", img: "https://i.ibb.co/prz24QCD/IMG-1395.png", clues: [{x:61, y:60, t:"남두헌"}, {x:9, y:78, t:"천은호"}] }
 ];
@@ -166,13 +189,23 @@ function playNarra() {
 function skipNarra() { if(isTyping) { clearInterval(typingTimer); document.getElementById('narra-box').innerText = repl(narration[narraIdx-1]); isTyping = false; } else { playNarra(); } }
 
 function renderScene() {
-    const s = scenes[curScene]; document.getElementById('place-name').innerText = s.name;
-    document.getElementById('main-bg').style.backgroundImage = `url(${s.img})`;
-    const layer = document.getElementById('hit-layer'); layer.innerHTML = "";
-    s.clues.forEach(c => {
-        const b = document.createElement('button'); b.className = 'clue-hit'; b.style.left = c.x+"%"; b.style.top = c.y+"%";
-        b.onclick = () => { foundSus.add(c.t); openProfile(c.t); }; layer.appendChild(b);
-    });
+    const s = scenes[curScene];
+    document.getElementById('place-name').innerText = s.name;
+    const bgImg = document.getElementById('bg-img');
+    const layer = document.getElementById('hit-layer');
+    layer.innerHTML = "";
+    bgImg.src = s.img;
+    bgImg.onload = () => {
+        layer.style.width = bgImg.clientWidth + "px";
+        layer.style.height = bgImg.clientHeight + "px";
+        s.clues.forEach(c => {
+            const b = document.createElement('button');
+            b.className = 'clue-hit';
+            b.style.left = c.x + "%"; b.style.top = c.y + "%";
+            b.onclick = () => { foundSus.add(c.t); openProfile(c.t); };
+            layer.appendChild(b);
+        });
+    };
 }
 function changeScene(d) { curScene = (curScene + d + 3) % 3; renderScene(); }
 
@@ -222,6 +255,16 @@ function showQs() {
             box.appendChild(nextB);
         };
         box.appendChild(b);
+    });
+}
+
+function buildArrestList() {
+    const grid = document.getElementById('sus-select-grid'); grid.innerHTML = "";
+    Array.from(foundSus).sort().forEach(n => {
+        const card = document.createElement('div'); card.className = "sus-card";
+        card.innerHTML = `<img src="${suspects[n].img}"><span>${n}</span>`;
+        card.onclick = () => { document.querySelectorAll('.sus-card').forEach(c => c.classList.remove('selected')); card.classList.add('selected'); selectedKiller = n; };
+        grid.appendChild(card);
     });
 }
 
