@@ -335,15 +335,15 @@ function judge() {
     const isCorrect = (selectedKiller === "남두헌");
 
     const validTitles = ["과실치사", "폭행치사", "유기치사", "살인", "형법제267조", "형법제262조", "형법제275조", "형법제250조"];
-    const hasValidTitle = validTitles.some(v => title.includes(v));
+    const hasValidTitle = validTitles.some(v => cleanTitle.includes(v));
 
     if(hasValidTitle) {
-        if(body.includes("생존가능성") || body.includes("방치")) score++;
-        if(body.includes("창문") || body.includes("저온노출") || body.includes("저체온") || body.includes("냉기유발") || body.includes("피해자생존가능성차단")) score++;
-        if(body.includes("허위진술") || body.includes("거짓증언") || body.includes("동선은폐") || body.includes("증언모순") || body.includes("접근사실부인")) score++;
-        if(body.includes("구두") || body.includes("바짓단")) score++;
-        if(body.includes("호칭") || body.includes("심리적거리두기")) score++;
-        if(body.includes("부작위에의한살인")) score += 2;
+        if(cleanBody.includes("생존가능성") || cleanBody.includes("방치")) score++;
+        if(cleanBody.includes("창문") || cleanBody.includes("저온노출") || cleanBody.includes("저체온") || cleanBody.includes("냉기유발") || cleanBody.includes("피해자생존가능성차단")) score++;
+        if(cleanBody.includes("허위진술") || cleanBody.includes("거짓증언") || cleanBody.includes("동선은폐") || cleanBody.includes("증언모순") || cleanBody.includes("접근사실부인")) score++;
+        if(cleanBody.includes("구두") || cleanBody.includes("바짓단")) score++;
+        if(cleanBody.includes("호칭") || cleanBody.includes("심리적거리두기")) score++;
+        if(cleanBody.includes("부작위에의한살인")) score += 2;
         if(score > 5) score = 5;
     }
 
