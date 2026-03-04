@@ -391,6 +391,20 @@ function judge() {
     }
     document.getElementById('end-bg').style.backgroundImage = `url(${bg})`;
     document.getElementById('end-msg').innerText = msg;
+        const reportData = {
+        name: last_name + first_name,
+        title: title,
+        score: score,
+        body: body
+    };
+
+    fetch('https://script.google.com/macros/s/AKfycbyqVE1OQSl32c_ZEvmYgV9v4zXwgnnrAdxbBMAn22vroXwQSkOFpDwD9DZupBmpp2k/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reportData)
+    });
+
     showScreen('scr-end');
 }
 </script>
