@@ -329,19 +329,21 @@ function judge() {
     if(!selectedKiller) return alert("범인을 선택하십시오.");
     const title = document.getElementById('rep-title').value;
     const body = document.getElementById('rep-body').value;
+    const cleanTitle = title.replace(/\s+/g, "");
+    const cleanBody = body.replace(/\s+/g, "");
     let score = 0;
     const isCorrect = (selectedKiller === "남두헌");
 
-    const validTitles = ["과실치사", "폭행치사", "유기치사", "살인", "형법 제267조", "형법 제262조", "형법 제275조", "형법 제250조"];
+    const validTitles = ["과실치사", "폭행치사", "유기치사", "살인", "형법제267조", "형법제262조", "형법제275조", "형법제250조"];
     const hasValidTitle = validTitles.some(v => title.includes(v));
 
     if(hasValidTitle) {
-        if(body.includes("생존 가능성") || body.includes("방치")) score++;
-        if(body.includes("창문") || body.includes("저온 노출") || body.includes("저체온") || body.includes("냉기 유발") || body.includes("피해자 생존 가능성 차단")) score++;
-        if(body.includes("허위 진술") || body.includes("거짓 증언") || body.includes("동선 은폐") || body.includes("증언 모순") || body.includes("접근 사실 부인")) score++;
+        if(body.includes("생존가능성") || body.includes("방치")) score++;
+        if(body.includes("창문") || body.includes("저온노출") || body.includes("저체온") || body.includes("냉기유발") || body.includes("피해자생존가능성차단")) score++;
+        if(body.includes("허위진술") || body.includes("거짓증언") || body.includes("동선은폐") || body.includes("증언모순") || body.includes("접근사실부인")) score++;
         if(body.includes("구두") || body.includes("바짓단")) score++;
-        if(body.includes("호칭") || body.includes("심리적 거리두기")) score++;
-        if(body.includes("부작위에 의한 살인")) score += 2;
+        if(body.includes("호칭") || body.includes("심리적거리두기")) score++;
+        if(body.includes("부작위에의한살인")) score += 2;
         if(score > 5) score = 5;
     }
 
