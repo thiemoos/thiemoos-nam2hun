@@ -268,14 +268,12 @@ function nextNarra() {
     const textBox = document.getElementById("narra-box");
     
     if (narraIdx === 4) {
-        // 소견서 전용 스타일 (위로 올리고 왼쪽 여백 맞춤)
         textBox.style.textAlign = "left";
-        textBox.style.paddingTop = "5%";
+        textBox.style.paddingTop = "3%";
         textBox.style.paddingLeft = "5%";
         textBox.style.fontSize = "15px";
         textBox.style.lineHeight = "1.3";
     } else {
-        // 일반 대사 스타일로 복구
         textBox.style.textAlign = "center";
         textBox.style.paddingTop = "20%";
         textBox.style.paddingLeft = "0";
