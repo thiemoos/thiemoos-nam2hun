@@ -266,10 +266,15 @@ function nextNarra() {
     if(narraIdx >= narration.length) { showScreen('scr-main'); renderScene(); return; }
 
     const textBox = document.getElementById("narra-box");
+    
     if (narraIdx === 4) {
         textBox.style.textAlign = "left";
+        textBox.style.fontSize = "14px";
+        textBox.style.lineHeight = "1.4";
     } else {
         textBox.style.textAlign = "center";
+        textBox.style.fontSize = "20px";
+        textBox.style.lineHeight = "1.8";
     }
 
     typeWriter(repl(narration[narraIdx++]), "narra-box");
