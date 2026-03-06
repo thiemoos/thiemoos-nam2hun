@@ -446,9 +446,9 @@ function judge() {
         } else {
             const table = { "과실치사": ["기소 기각","집행유예","벌금 300","벌금 700","금고 1년","금고 2년"], "폭행치사": ["기소 기각","집행유예","징역 3년","징역 4년","징역 5년","징역 6년"], "유기치사": ["기소 기각","집행유예","징역 3년","징역 4년","징역 5년","징역 7년"], "살인": ["기소 기각","집행유예","징역 5년","징역 6년","징역 7년","징역 8년"] };
             let type = "살인";
-            if (cleanTitle.includes("과실") || cleanTitle.includes("제267조")) type = "과실";
-            else if (cleanTitle.includes("폭행") || cleanTitle.includes("제262조")) type = "폭행";
-            else if (cleanTitle.includes("유기") || cleanTitle.includes("제275조")) type = "유기";
+            if (cleanTitle.includes("과실") || cleanTitle.includes("제267조")) type = "과실치사";
+            else if (cleanTitle.includes("폭행") || cleanTitle.includes("제262조")) type = "폭행치사";
+            else if (cleanTitle.includes("유기") || cleanTitle.includes("제275조")) type = "유기치사";
             else if (cleanTitle.includes("살인") || cleanTitle.includes("제250조")) type = "살인";
             msg = table[type][score] || "판결 완료";
         }
@@ -464,7 +464,7 @@ function judge() {
         memo: memoContent
     };
 
-    fetch('https://script.google.com/macros/s/AKfycbyqVE1OQSl32c_ZEvmYgV9v4zXwgnnrAdxbBMAn22vroXwQSkOFpDwD9DZupBmpp2k/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbyv-j4pkefBwlbX2cBa_e1LOFJpe6Mo7zSXZB11mnDXoNedRgE4gLeJbqfWLEGsu04R/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
