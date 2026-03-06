@@ -409,10 +409,17 @@ function retryGame() {
     foundSus.clear(); 
     selectedKiller = ""; 
     interRound = 0;
+    
     document.getElementById('rep-title').value = ""; 
     document.getElementById('rep-body').value = "";
-    document.getElementById('end-msg-box').classList.remove('top-mode', 'scroll-mode');
-    document.getElementById('retry-btn').style.display = "none";
+    document.getElementById('end-msg').innerText = "";
+    document.getElementById('end-bg').style.backgroundImage = "";
+    
+    const box = document.getElementById('end-msg-box');
+    box.classList.remove('top-mode', 'scroll-mode');
+    
+    const retryBtn = document.getElementById('retry-btn');
+    if(retryBtn) retryBtn.style.display = "none";
     
     showScreen('scr-main'); 
     renderScene();
