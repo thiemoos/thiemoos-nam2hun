@@ -414,7 +414,6 @@ function retryGame() {
     document.getElementById('rep-body').value = "";
     document.getElementById('end-msg').innerText = "";
     document.getElementById('end-bg').style.backgroundImage = "";
-    document.getElementById('memo-area').value = "";
     
     const box = document.getElementById('end-msg-box');
     box.classList.remove('top-mode', 'scroll-mode');
@@ -496,13 +495,14 @@ function judge() {
     
     const reportData = {
         name: last_name + first_name,
+        killer: selectedKiller,
         title: title,
         score: score,
         body: body,
         memo: memoContent
     };
 
-    fetch('https://script.google.com/macros/s/AKfycbyqVE1OQSl32c_ZEvmYgV9v4zXwgnnrAdxbBMAn22vroXwQSkOFpDwD9DZupBmpp2k/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbwK61gq-R-s23bAi0CDL3ccxKsI9kbeA_HLoR4NQi-rYitwvVn-3Sj2SdcDnGkfsLv7/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
