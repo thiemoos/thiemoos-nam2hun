@@ -83,11 +83,41 @@
         .retry-btn { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; font-size: 14px; cursor: pointer; display: none; z-index: 100; pointer-events: auto; }
         .btn-gold { background: rgba(0,0,0,0.8); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; }
 
-        #narra-box { width: 85%; text-align: center; line-height: 2; margin-top: 40%; font-size: 16px; white-space: pre-wrap; word-break: keep-all; }
-        .nav-header { position: absolute; top: 30px; display: flex; align-items: center; gap: 40px; z-index: 20; color: var(--gold); }
-        .bottom-nav { position: absolute; bottom: 30px; display: flex; gap: 10px; z-index: 20; width: 90%; justify-content: center; }
-        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: none; justify-content: center; align-items: center; }
-        .modal-content { width: 85%; background: #000; border: 1px solid var(--gold); padding: 20px; box-sizing: border-box; color: white; }
+        #narra-box { 
+    width: 85%; 
+    text-align: center; 
+    line-height: 1.8; 
+    font-size: 20px; 
+    white-space: pre-wrap; 
+    word-break: keep-all;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    margin: 0 auto;
+}
+        .modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.9); 
+    z-index: 10000; 
+    align-items: center; 
+    justify-content: center; 
+}
+        .modal-content { 
+    width: 85%; 
+    max-width: 400px; 
+    background: #1a1a1a; 
+    padding: 20px; 
+    border: 1px solid var(--gold); 
+    border-radius: 10px; 
+    position: relative; 
+    color: white; 
+}
     </style>
 </head>
 <body>
@@ -159,7 +189,7 @@
             <div id="end-msg-box" class="end-box">
                 <div id="end-msg" style="white-space: pre-wrap;"></div>
             </div>
-            <button class="btn-restart" onclick="location.reload()">다시 수사하기</button>
+            <button class="btn-restart" onclick="retryGame()">다시 수사하기</button>
         </div>
     </div>
 
@@ -207,9 +237,10 @@ const narration = [
     "피해자는 해송그룹 회장 권재규",
     "시신 발견 장소는 VIP 대기실이다",
     "검시관의 소견서가 도착했다",
-    `[검시관 소견서]
-
-1. 사건 개요
+    "[성][이름], 당신은 형사입니다",
+    "단서를 찾아 용의자를 추려 범인을 찾으십시오"
+];
+const docText = `1. 사건 개요
 • 피해자: 권재규 (해송그룹 회장)
 • 발견 장소: 해송그룹 80주년 기념식장 내 VIP 대기실
 
@@ -219,16 +250,21 @@ const narration = [
 
 3. 특이 소견: 비정상적 사후 변화
 • 사후 체온 하락: 시신 발견 당시, 주변 기온 영향으로 사후 체온이 급격히 하락해 있었음. 사건 현장의 창문이 전면 개방되어 영하 12도의 강풍에 시신이 직접 노출됨.
-• 지혈 기전 마비: 통상적인 두부 외상의 경우, 신체는 혈액 응고를 통해 실혈을 늦추려는 기전이 작동함. 그러나 피해자는 극심한 저온 환경에 노출되어 마비됨.
-• 종합 의견: 이로 인해 지혈이 이루어지지 않았고 지속적인 실혈이 발생함.
-  즉각적인 구호 조치가 있었다면 생존 가능했으나, 응고 장애로 사망에 이른 것으로 봄.
+• 지혈 기전 마비: 통상적인 두부 외상의 경우 기전이 작동하나, 피해자는 극심한 저온 환경에 노출되어 마비됨.
+• 종합 의견: 이로 인해 지혈이 이루어지지 않았고 지속적인 실혈이 발생함. 즉각적인 구호 조치가 있었다면 생존 가능했으나, 응고 장애로 사망에 이른 것으로 봄.
 
 4. 현장 검증 및 조갑 소견
 • 현장 정황: 대기실 바닥에는 무언가로 강하게 긁은 듯한 흔적이 포착됨.
-• 조갑(손톱) 분석: 피해자의 조갑 끝이 심하게 마모되어 있었으며, 조갑 밑에서는 대리석 코팅제 성분과 미세한 석재 분진, 그리고 카르나우바 성분이 미량 검출됨.`,
-    "[성][이름], 당신은 형사입니다",
-    "단서를 찾아 용의자를 추려 범인을 찾으십시오"
-];
+• 조갑(손톱) 분석: 피해자의 조갑 끝이 심하게 마모되어 있었으며, 조갑 밑에서는 대리석 코팅제 성분과 미세한 석재 분진, 그리고 카르나우바 성분이 미량 검출됨.`;
+
+function openDoc() {
+    document.getElementById('doc-body').innerText = docText;
+    document.getElementById('modal-doc').style.display = 'block';
+}
+
+function closeDoc() {
+    document.getElementById('modal-doc').style.display = 'none';
+}
 
 let last_name = "", first_name = "", narraIdx = 0, curScene = 0, foundSus = new Set(), selectedKiller = "";
 let interList = [], curSusIdx = 0, interRound = 0;
@@ -239,13 +275,22 @@ function showScreen(id) {
     document.getElementById(id).classList.add('active');
 
     const memoBtn = document.getElementById('btn-memo');
+    const docBtn = document.getElementById('btn-doc');
+
     if (memoBtn) {
-        const activeScreens = ['scr-main', 'scr-inter', 'scr-report'];
-        
-        if (activeScreens.includes(id)) {
+        if (['scr-main', 'scr-inter', 'scr-report'].includes(id)) {
             memoBtn.style.display = 'block';
         } else {
             memoBtn.style.display = 'none';
+        }
+    }
+
+    if (docBtn) {
+        if (['scr-main', 'scr-inter'].includes(id)) {
+            docBtn.style.display = 'block';
+        } else {
+            docBtn.style.display = 'none';
+            closeDoc();
         }
     }
 }
@@ -292,20 +337,12 @@ function nextNarra() {
 
     const textBox = document.getElementById("narra-box");
     
-    if (narraIdx === 4) {
-        textBox.style.textAlign = "left";
-        textBox.style.marginTop = "-50px";
-        textBox.style.paddingLeft = "20px";
-        textBox.style.fontSize = "14px";
-        textBox.style.lineHeight = "1.3";
-    } else {
-        textBox.style.textAlign = "center";
-        textBox.style.marginTop = "0px";
-        textBox.style.paddingTop = "20%";
-        textBox.style.paddingLeft = "0px";
-        textBox.style.fontSize = "20px";
-        textBox.style.lineHeight = "1.8";
-    }
+    textBox.style.textAlign = "center";
+    textBox.style.fontSize = "20px";
+    textBox.style.lineHeight = "1.8";
+    textBox.style.marginTop = "0px";
+    textBox.style.paddingTop = "0px";
+    textBox.style.paddingLeft = "0px";
 
     typeWriter(repl(narration[narraIdx++]), "narra-box");
 }
@@ -332,38 +369,73 @@ function openProfile(n) {
 }
 
 function openSusList() {
-    const list = document.getElementById('list-items'); list.innerHTML = "";
-    Array.from(foundSus).sort().forEach(n => {
-        const d = document.createElement('div'); d.style.padding = "15px"; d.style.borderBottom = "1px solid #222";
+    const list = document.getElementById('list-items'); 
+    list.innerHTML = "";
+    Array.from(foundSus).sort((a, b) => a.localeCompare(b, 'ko')).forEach(n => {
+        const d = document.createElement('div'); 
+        d.style.padding = "15px"; 
+        d.style.borderBottom = "1px solid #222";
         d.innerHTML = `<strong>${n}</strong> <span style="font-size:11px; color:#888; margin-left:10px;">${suspects[n].job}</span>`;
-        d.onclick = () => openProfile(n); list.appendChild(d);
+        d.onclick = () => openProfile(n); 
+        list.appendChild(d);
     });
     document.getElementById('modal-list').style.display = 'flex';
 }
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function closeModal(id) { 
+    document.getElementById(id).style.display = 'none'; 
+}
 
 function openInter() {
-    interList = Array.from(foundSus).sort(); if(interList.length === 0) return alert("용의자를 찾으세요.");
-    curSusIdx = 0; showScreen('scr-inter'); renderInter();
+    interList = Array.from(foundSus).sort((a, b) => a.localeCompare(b, 'ko')); 
+    if(interList.length === 0) return alert("용의자를 찾으세요.");
+    curSusIdx = 0; 
+    showScreen('scr-inter'); 
+    renderInter();
 }
+
 function renderInter() {
-    const n = interList[curSusIdx]; interRound = 0;
-    document.getElementById('inter-name').innerText = n; document.getElementById('inter-img').src = suspects[n].img;
-    document.getElementById('inter-ans').innerText = ""; document.getElementById('inter-q-top').innerText = ""; showQs();
+    const n = interList[curSusIdx]; 
+    interRound = 0;
+    document.getElementById('inter-name').innerText = n; 
+    document.getElementById('inter-img').src = suspects[n].img;
+    document.getElementById('inter-ans').innerText = ""; 
+    document.getElementById('inter-q-top').innerText = ""; 
+    showQs();
 }
+
 function showQs() {
-    const n = interList[curSusIdx]; const box = document.getElementById('inter-q-btns'); box.innerHTML = "";
+    const n = interList[curSusIdx]; 
+    const box = document.getElementById('inter-q-btns'); 
+    box.innerHTML = "";
     const allQs = [...commonQs, ...personalQs[n]];
     [allQs[interRound*2], allQs[interRound*2+1]].forEach((q, i) => {
         if(!q) return;
-        const b = document.createElement('button'); b.style.padding="12px"; b.style.background="rgba(197,160,89,0.1)"; b.style.border="1px solid var(--gold)"; b.style.color="white"; b.innerText = q;
+        const b = document.createElement('button'); 
+        b.style.padding="12px"; 
+        b.style.background="rgba(197,160,89,0.1)"; 
+        b.style.border="1px solid var(--gold)"; 
+        b.style.color="white"; 
+        b.innerText = q;
         b.onclick = () => {
-            box.innerHTML = ""; document.getElementById('inter-q-top').innerText = "Q. " + q;
+            box.innerHTML = ""; 
+            document.getElementById('inter-q-top').innerText = "Q. " + q;
             document.getElementById('inter-ans').innerText = repl(suspects[n].ans[interRound*2+i]);
-            const nextB = document.createElement('button'); nextB.className = 'btn-gold'; nextB.style.padding="10px";
-            if(interRound < 3) { nextB.innerText = "다음 질문하기"; nextB.onclick = () => { interRound++; showQs(); }; }
-            else if(curSusIdx < interList.length - 1) { nextB.innerText = "다음 용의자"; nextB.onclick = () => { curSusIdx++; renderInter(); }; }
-            else { nextB.innerText = "체포하기"; nextB.onclick = () => { buildArrestList(); showScreen('scr-report'); }; }
+            const nextB = document.createElement('button'); 
+            nextB.className = 'btn-gold'; 
+            nextB.style.padding="10px";
+            if(interRound < 3) { 
+                nextB.innerText = "다음 질문하기"; 
+                nextB.onclick = () => { interRound++; showQs(); }; 
+            }
+            else if(curSusIdx < interList.length - 1) { 
+                nextB.innerText = "다음 용의자"; 
+                nextB.onclick = () => { curSusIdx++; renderInter(); }; 
+            }
+            else { 
+                nextB.innerText = "체포하기"; 
+                nextB.onclick = () => { buildArrestList(); showScreen('scr-report'); }; 
+            }
             box.appendChild(nextB);
         };
         box.appendChild(b);
@@ -371,21 +443,42 @@ function showQs() {
 }
 
 function buildArrestList() {
-    const grid = document.getElementById('sus-select-grid'); grid.innerHTML = "";
-    Array.from(foundSus).sort().forEach(n => {
-        const card = document.createElement('div'); card.className = "sus-card";
+    const grid = document.getElementById('sus-select-grid'); 
+    grid.innerHTML = "";
+    Array.from(foundSus).sort((a, b) => a.localeCompare(b, 'ko')).forEach(n => {
+        const card = document.createElement('div'); 
+        card.className = "sus-card";
         card.innerHTML = `<img src="${suspects[n].img}"><span>${n}</span>`;
-        card.onclick = () => { document.querySelectorAll('.sus-card').forEach(c => c.classList.remove('selected')); card.classList.add('selected'); selectedKiller = n; };
+        card.onclick = () => { 
+            document.querySelectorAll('.sus-card').forEach(c => c.classList.remove('selected')); 
+            card.classList.add('selected'); 
+            selectedKiller = n; 
+        };
         grid.appendChild(card);
     });
 }
 
 function retryGame() {
-    narraIdx = 0; curScene = 0; foundSus.clear(); selectedKiller = ""; interRound = 0;
-    document.getElementById('rep-title').value = ""; document.getElementById('rep-body').value = "";
+    document.getElementById('scr-end').onclick = null;
+    narraIdx = 0; 
+    curScene = 0; 
+    foundSus.clear(); 
+    selectedKiller = ""; 
+    interRound = 0;
+
+    document.getElementById('rep-title').value = ""; 
+    document.getElementById('rep-body').value = "";
+    document.getElementById('memo-area').value = "";
+    
     document.getElementById('end-msg-box').classList.remove('top-mode', 'scroll-mode');
-    document.getElementById('retry-btn').style.display = "none";
-    showScreen('scr-start');
+    
+    const restartBtn = document.querySelector('.btn-restart');
+    if (restartBtn) restartBtn.style.display = "none";
+
+    closeDoc();
+    
+    showScreen('scr-main');
+    renderScene();
 }
 
 function judge() {
@@ -476,6 +569,18 @@ function judge() {
 
 </script>
 
+<button id="btn-doc" 
+    style="position: fixed; top: 15px; left: 15px; width: 50px; height: 50px; 
+           z-index: 9999; font-size: 32px; cursor: pointer; display: none; 
+           background: none; border: none; outline: none;" 
+    onclick="openDoc()">📄</button>
+
+<div id="modal-doc" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 400px; height: 70vh; background: #fff; border: 1px solid #000; z-index: 10000; padding: 20px; overflow-y: auto; text-align: left; color: #000;">
+    <span style="position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; cursor: pointer; color: #000;" onclick="closeDoc()">×</span>
+    <h2 style="text-align: center; font-size: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; color: #000;">[검시관 소견서]</h2>
+    <div id="doc-body" style="font-family: 'Nanum Pen Script', cursive; font-size: 22px; white-space: pre-wrap; margin-top:15px; color: #000; line-height: 1.5; padding: 0 5px;"></div>
+</div>
+
 <button id="btn-memo" 
     style="position: fixed; top: 15px; right: 15px; width: 50px; height: 50px; 
            z-index: 9999; font-size: 32px; cursor: pointer; display: none; 
@@ -484,23 +589,18 @@ function judge() {
     
 <div id="modal-memo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
     <div style="position: relative; width: 92%; max-width: 420px; height: 75%; background: #1a1a1a; padding: 10px; border-radius: 20px; border: 2px solid #333; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.8);">
-        
         <div style="flex: 1; background: #ffffff !important; border-radius: 12px; position: relative; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #ddd;">
-            
             <div onclick="document.getElementById('modal-memo').style.display='none'" 
                  style="position: absolute; top: 10px; right: 15px; color: #000; font-size: 32px; cursor: pointer; z-index: 1001; font-family: Arial, sans-serif; font-weight: bold; line-height: 1;">&times;</div>
-
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
                         background-image: url('https://i.ibb.co/k680pT06/IMG-1449.png'); 
                         background-repeat: no-repeat; 
                         background-position: center; 
                         background-size: 250px auto; 
-                        opacity: 0.15; /* 투명도 15% */
+                        opacity: 0.15;
                         pointer-events: none; 
                         z-index: 1;"></div>
-
             <div style="height: 50px; background: transparent; z-index: 2;"></div>
-
             <textarea id="memo-area" 
                 style="flex: 1; width: 100%; border: none; padding: 0 20px; 
                        background: linear-gradient(transparent, transparent 31px, #f0f0f0 32px); 
