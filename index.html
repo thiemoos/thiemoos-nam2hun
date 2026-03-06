@@ -81,7 +81,27 @@
         .end-box.scroll-mode { height: 40%; overflow-y: auto; text-align: left; }
 
         .retry-btn { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; font-size: 14px; cursor: pointer; display: none; z-index: 100; pointer-events: auto; }
-        .btn-gold { background: rgba(0,0,0,0.8); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; }
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            z-index: 1000;
+        }
+
+        .btn-gold {
+            flex: 1;
+            height: 100%;
+            background: var(--gold);
+            color: black;
+            border: 1px solid black;
+            border-radius: 0 !important;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
         #narra-box { 
     width: 85%; 
@@ -111,10 +131,10 @@
         .modal-content { 
     width: 85%; 
     max-width: 400px; 
-    background: #1a1a1a; 
+    background: #000000; 
     padding: 20px; 
     border: 1px solid var(--gold); 
-    border-radius: 10px; 
+    border-radius: 0 !important; 
     position: relative; 
     color: white; 
 }
@@ -155,11 +175,11 @@
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <button class="btn-gold" style="flex:1; height:45px;" onclick="openSusList()">용의자 명단</button>
-        <button class="btn-gold" style="flex:1; height:45px;" onclick="openInter()">용의자 심문</button>
-    </div>
+<div class="bottom-nav" style="display: flex; position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 1000;">
+    <button class="btn-gold" style="flex: 1; height: 100%; background: #c5a059; color: #000; border: 1px solid #000; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 0;" onclick="openSusList()">용의자 명단</button>
+    <button class="btn-gold" style="flex: 1; height: 100%; background: #c5a059; color: #000; border: 1px solid #000; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 0;" onclick="openInter()">용의자 심문</button>
 </div>
+
 
     <div id="scr-inter" class="screen" style="background:black;">
         <div style="height:35%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
