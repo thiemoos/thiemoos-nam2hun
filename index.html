@@ -262,19 +262,6 @@ function handleNarraClick() {
     }
 }
 
-
-}
-
-function handleNarraClick() {
-    if (isTyping) {
-        clearTimeout(typingTimer);
-        document.getElementById('narra-box').innerText = currentFullText;
-        isTyping = false;
-    } else {
-        nextNarra();
-    }
-}
-
 function nextNarra() {
     if(narraIdx >= narration.length) { showScreen('scr-main'); renderScene(); return; }
 
