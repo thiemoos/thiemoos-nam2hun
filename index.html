@@ -10,6 +10,8 @@
     <meta property="og:image" content="https://i.ibb.co/PZcq8hFB/IMG-1446.jpg"> 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://i.ibb.co/PZcq8hFB/IMG-1446.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+
 
     <title>파편의 기록</title>
 
@@ -108,23 +110,30 @@
         <div id="narra-box"></div>
     </div>
 
-    <div id="scr-main" class="screen">
-        <div id="main-bg" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-            <div id="img-wrapper" style="position:relative;">
-                <img id="bg-img" style="max-width:100%; max-height:80vh; display:block;">
-                <div id="hit-layer" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></div>
-            </div>
-        </div>
-        <div class="nav-header">
-            <span onclick="changeScene(-1)">◀</span>
-            <span id="place-name"></span>
-            <span onclick="changeScene(1)">▶</span>
-        </div>
-        <div class="bottom-nav">
-            <button class="btn-gold" style="flex:1; height:45px;" onclick="openSusList()">용의자 명단</button>
-            <button class="btn-gold" style="flex:1; height:45px;" onclick="openInter()">용의자 심문</button>
+<div id="scr-main" class="screen">
+    <div id="main-bg" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+        <div id="img-wrapper" style="position:relative;">
+            <img id="bg-img" style="max-width:100%; max-height:80vh; display:block;">
+            <div id="hit-layer" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></div>
         </div>
     </div>
+    <div class="nav-header">
+        <span onclick="changeScene(-1)">◀</span>
+        <span id="place-name"></span>
+        <span onclick="changeScene(1)">▶</span>
+    </div>
+
+<button id="btn-memo" 
+    style="position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; 
+           z-index: 100; font-size: 28px; cursor: pointer; display: none; 
+           background: none; border: none; outline: none;" 
+    onclick="openMemo()">📓</button>
+
+    <div class="bottom-nav">
+        <button class="btn-gold" style="flex:1; height:45px;" onclick="openSusList()">용의자 명단</button>
+        <button class="btn-gold" style="flex:1; height:45px;" onclick="openInter()">용의자 심문</button>
+    </div>
+</div>
 
     <div id="scr-inter" class="screen" style="background:black;">
         <div style="height:35%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
@@ -231,8 +240,28 @@ let last_name = "", first_name = "", narraIdx = 0, curScene = 0, foundSus = new 
 let interList = [], curSusIdx = 0, interRound = 0;
 let isTyping = false, typingTimer = null, currentFullText = "";
 
-function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function repl(t) { return t.replace(/\[성\]/g, last_name).replace(/\[이름\]/g, first_name); }
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+
+    const memoBtn = document.getElementById('btn-memo');
+    if (memoBtn) {
+        if (['scr-main', 'scr-inter', 'scr-report'].includes(id)) {
+            memoBtn.style.display = 'block';
+        } else {
+            memoBtn.style.display = 'none';
+        }
+    }
+}
+
+function repl(t) { 
+    return t.replace(/\[성\]/g, last_name).replace(/\[이름\]/g, first_name); 
+}
+
+function openMemo() {
+    document.getElementById('modal-memo').style.display = 'flex';
+    document.getElementById('memo-area').focus();
+}
 
 function initGame() {
     last_name = document.getElementById('ln').value; first_name = document.getElementById('fn').value;
@@ -367,6 +396,7 @@ function judge() {
     if(!selectedKiller) return alert("범인을 선택하십시오.");
     const title = document.getElementById('rep-title').value;
     const body = document.getElementById('rep-body').value;
+    const memoContent = document.getElementById('memo-area').value;
     const cleanTitle = title.replace(/\s+/g, "");
     const cleanBody = body.replace(/\s+/g, "");
     let score = 0;
@@ -429,11 +459,13 @@ function judge() {
     }
     document.getElementById('end-bg').style.backgroundImage = `url(${bg})`;
     document.getElementById('end-msg').innerText = msg;
-        const reportData = {
+    
+    const reportData = {
         name: last_name + first_name,
         title: title,
         score: score,
-        body: body
+        body: body,
+        memo: memoContent
     };
 
     fetch('https://script.google.com/macros/s/AKfycbyqVE1OQSl32c_ZEvmYgV9v4zXwgnnrAdxbBMAn22vroXwQSkOFpDwD9DZupBmpp2k/exec', {
@@ -445,6 +477,35 @@ function judge() {
 
     showScreen('scr-end');
 }
+
 </script>
+
+<div id="modal-memo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
+    
+    <div style="position: relative; width: 92%; max-width: 420px; height: 75%; background: #1a1a1a; padding: 10px; border-radius: 20px; border: 2px solid #333; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.8);">
+        
+        <div style="flex: 1; background: #ffffff !important; border-radius: 12px; position: relative; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #ddd;">
+            
+            <div onclick="document.getElementById('modal-memo').style.display='none'" 
+                 style="position: absolute; top: 10px; right: 15px; color: #000; font-size: 32px; cursor: pointer; z-index: 10; font-family: Arial, sans-serif; font-weight: bold; line-height: 1;">&times;</div>
+
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; 
+                        background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Emblem_of_the_Korean_National_Police_Agency.svg/1200px-Emblem_of_the_Korean_National_Police_Agency.svg.png') no-repeat center; 
+                        background-size: contain; opacity: 0.12; pointer-events: none; z-index: 1;"></div>
+
+            <div style="height: 50px; background: transparent; z-index: 2;"></div>
+
+            <textarea id="memo-area" 
+                style="flex: 1; width: 100%; border: none; padding: 0 20px; 
+                       background: linear-gradient(transparent, transparent 31px, #f0f0f0 32px); 
+                       background-size: 100% 32px; line-height: 32px; 
+                       font-family: 'Nanum Pen Script', cursive; font-size: 24px; color: #333;
+                       resize: none; outline: none; overflow-y: auto; z-index: 5; position: relative;
+                       background-attachment: local;" 
+                placeholder=""></textarea>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
